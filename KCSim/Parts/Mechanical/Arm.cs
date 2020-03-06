@@ -12,8 +12,19 @@ namespace KCSim.Parts.Mechanical
         public Axle EndAxle { get; set; }
         public Axle FulcrumAxle { get; set; }
 
-        public Arm()
+        private readonly string name;
+
+        public Arm(string name = "default arm name")
         {
+            this.name = name;
+
+            this.EndAxle = new Axle();
+            this.FulcrumAxle = new Axle();
+        }
+
+        public override string ToString()
+        {
+            return "Arm: \"" + name + "\"";
         }
     }
 }

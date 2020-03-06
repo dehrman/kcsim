@@ -1,71 +1,32 @@
 ﻿using System;
 using KCSim.Parts.Mechanical;
 using KCSim.Physics;
+using SimpleInjector;
 
 namespace KCSim
 {
-    class Program
+    static class Program
     {
-        Diode diode;
-        Axle inputAxle;
-        Axle outputAxle;
+        private static readonly Container container;
 
         static void Main(string[] args)
         {
-            Program program = new Program();
+            Simulator simulator = container.GetInstance<Simulator>();
 
-            program.runDiodeTest();
+            simulator.runDiodeTest();
         }
 
-        public Program()
+        static Program()
         {
-            diode = new Diode(isPositiveDirection: true);
+            // 1. Create a new Simple Injector container
+            container = new Container();
 
-            inputAxle = diode.InputAxle;
-            outputAxle = diode.OutputAxle;
-        }
+            // 2. Configure the container (register)
+            container.Register<IMotionTimer, MotionTimer>();
+            container.Register<Simulator>();
 
-        private void runDiodeTest()
-        {
-            Console.WriteLine("Running diode test...");
-            printState();
-
-            Console.WriteLine("Adding positive slow force on input axle...");
-            inputAxle.AddForce(new Force(1));
-            printState();
-
-            Console.WriteLine("Adding positive fast force on input axle...");
-            Force doubleForce = new Force(2);
-            inputAxle.AddForce(doubleForce);
-            printState();
-
-            Console.WriteLine("Removing positive fast force on input axle...");
-            inputAxle.RemoveForce(doubleForce);
-            printState();
-
-            Console.WriteLine("Adding negative slow force on input axle");
-            inputAxle.RemoveAllForces();
-            inputAxle.AddForce(new Force(-1));
-            printState();
-
-            Console.WriteLine("Removing all forces on input axle...");
-            inputAxle.RemoveAllForces();
-            printState();
-
-            Console.WriteLine("Adding positive fast force on output axle...");
-            outputAxle.AddForce(doubleForce);
-            Console.WriteLine("Adding positive slow force on input axle");
-            inputAxle.AddForce(new Force(1));
-            printState();
-
-            Console.WriteLine("Removing positive fast force on output axle...");
-            outputAxle.RemoveForce(doubleForce);
-            printState();
-        }
-
-        private void printState()
-        {
-            Console.WriteLine("Condition: Input={" + inputAxle + "}; Output={" + outputAxle + "}");
+            // 3. Verify your configuration
+            container.Verify();
         }
     }
 }

@@ -80,9 +80,9 @@ namespace KCSim.Parts.Mechanical
             // to the output.
             if (mostRecentInputToOutputForce != Force.ZeroForce)
             {
-                output.OnNetForceChangedSet.Remove(OnOutputNetForceChanged);
+                output.OnNetForceChangedDelegateSet.Remove(OnOutputNetForceChanged);
                 output.RemoveForce(mostRecentInputToOutputForce);
-                output.OnNetForceChangedSet.Add(OnOutputNetForceChanged);
+                output.OnNetForceChangedDelegateSet.Add(OnOutputNetForceChanged);
             }
 
             EvaluateForces();
@@ -94,9 +94,9 @@ namespace KCSim.Parts.Mechanical
             // to the input.
             if (mostRecentOutputToInputForce != Force.ZeroForce)
             {
-                input.OnNetForceChangedSet.Remove(OnInputNetForceChanged);
+                input.OnNetForceChangedDelegateSet.Remove(OnInputNetForceChanged);
                 input.RemoveForce(mostRecentOutputToInputForce);
-                input.OnNetForceChangedSet.Add(OnInputNetForceChanged);
+                input.OnNetForceChangedDelegateSet.Add(OnInputNetForceChanged);
             }
 
             EvaluateForces();
@@ -104,14 +104,14 @@ namespace KCSim.Parts.Mechanical
 
         private void AddListeners()
         {
-            input.OnNetForceChangedSet.Add(OnInputNetForceChanged);
-            output.OnNetForceChangedSet.Add(OnOutputNetForceChanged);
+            input.OnNetForceChangedDelegateSet.Add(OnInputNetForceChanged);
+            output.OnNetForceChangedDelegateSet.Add(OnOutputNetForceChanged);
         }
 
         private void RemoveListeners()
         {
-            input.OnNetForceChangedSet.Remove(OnInputNetForceChanged);
-            output.OnNetForceChangedSet.Remove(OnOutputNetForceChanged);
+            input.OnNetForceChangedDelegateSet.Remove(OnInputNetForceChanged);
+            output.OnNetForceChangedDelegateSet.Remove(OnOutputNetForceChanged);
         }
 
         public static Coupling<I, O> NewGearCoupling<I, O>(I input, O output, CouplingType couplingType, String name = "")

@@ -1,32 +1,34 @@
+using System;
+using Xunit;
+
 using KCSim.Parts.Mechanical;
 using KCSim.Physics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace KCSimTests
 {
-    [TestClass]
     public class DiodeTests
     {
         private Diode positiveDiode;
         private Diode negativeDiode;
 
-        [TestInitialize]
-        public void Initialize()
+        public DiodeTests()
         {
             positiveDiode = new Diode(isPositiveDirection: true);
             negativeDiode = new Diode(isPositiveDirection: false);
         }
 
-        [TestMethod]
-        public void TestThat_PositiveInput_Yields_EquivalentPositiveOutput()
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        public void TestThat_PositiveInput_Yields_EquivalentPositiveOutput(int value)
         {
             Axle inputAxle = positiveDiode.InputAxle;
             Axle outputAxle = positiveDiode.OutputAxle;
-            inputAxle.AddForce(new Force(1));
-            Assert.AreEqual(1, outputAxle.GetNetForce().Velocity);
+            inputAxle.AddForce(new Force(value));
+            Assert.Equal(value, outputAxle.GetNetForce().Velocity);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestThat_MultiplePositiveInputs_Yield_MaximumPositiveOutput()
         {
             Axle inputAxle = positiveDiode.InputAxle;
@@ -34,10 +36,10 @@ namespace KCSimTests
             inputAxle.AddForce(new Force(1));
             inputAxle.AddForce(new Force(3));
             inputAxle.AddForce(new Force(2));
-            Assert.AreEqual(3, outputAxle.GetNetForce().Velocity);
+            Assert.Equal(3, outputAxle.GetNetForce().Velocity);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestThat_RemovingInputForce_Yields_NextHighestPositiveOutput()
         {
             Axle inputAxle = positiveDiode.InputAxle;
@@ -47,7 +49,7 @@ namespace KCSimTests
             inputAxle.AddForce(force3);
             inputAxle.AddForce(new Force(2));
             inputAxle.RemoveForce(force3);
-            Assert.AreEqual(2, outputAxle.GetNetForce().Velocity);
+            Assert.Equal(2, outputAxle.GetNetForce().Velocity);
         }
 
         /*

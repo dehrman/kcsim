@@ -10,7 +10,9 @@ namespace KCSim.Physics
 
         public delegate void TorqueChangedDelegate(Torqueable torqueable);
 
-        public readonly ISet<TorqueChangedDelegate> OnNetForceChangedSet
+        public readonly ISet<TorqueChangedDelegate> OnNetForceChangedDelegateSet
+            = new HashSet<TorqueChangedDelegate>();
+        public readonly ISet<TorqueChangedDelegate> OnDirectionChangedDelegateSet
             = new HashSet<TorqueChangedDelegate>();
 
         public Torqueable(string name="")
@@ -44,6 +46,11 @@ namespace KCSim.Physics
 
         public void AddForce(Force force)
         {
+            if (forces.Contains(force))
+            {
+                return;
+            }
+
             Force previousNetForce = GetNetForce();
 
             // Check that we're not applying a destructive force.
@@ -53,28 +60,57 @@ namespace KCSim.Physics
                     + previousNetForce + " exists on " + ToString());
             }
 
+            
             forces.Add(force);
             forces.Sort();
             CheckAndNotifyForNetForceChange(previousNetForce);
+            CheckAndNotifyForDirectionChange(previousNetForce);
         }
 
-        private void CheckAndNotifyForNetForceChange(Force previousNetForce)
+        /**
+         * <returns>true if the net force changed, false otherwise</returns>
+         */
+        protected virtual bool CheckAndNotifyForNetForceChange(Force previousNetForce)
         {
             Force netForce = GetNetForce();
             if (previousNetForce == netForce)
             {
-                return;
+                return false;
             }
-
-            // Console.WriteLine("New net force on " + ToString());
 
             // We must create a copy of the delegates before iterating through them in the event that the set is
             // modified from outside this class during the iteration.
-            ISet<TorqueChangedDelegate> copyOfDelegates = new HashSet<TorqueChangedDelegate>(OnNetForceChangedSet);
+            ISet<TorqueChangedDelegate> copyOfDelegates =
+                new HashSet<TorqueChangedDelegate>(OnNetForceChangedDelegateSet);
             foreach (TorqueChangedDelegate handler in copyOfDelegates)
             {
                 handler(this);
             }
+
+            return true;
+        }
+
+        /**
+         * <returns>true if the direction changed, false otherwise</returns>
+         */
+        protected virtual bool CheckAndNotifyForDirectionChange(Force previousNetForce)
+        {
+            Force netForce = GetNetForce();
+            if (MotionMath.IsSameDirection(previousNetForce.Velocity, netForce.Velocity))
+            {
+                return false;
+            }
+
+            // We must create a copy of the delegates before iterating through them in the event that the set is
+            // modified from outside this class during the iteration.
+            ISet<TorqueChangedDelegate> copyOfDelegates =
+                new HashSet<TorqueChangedDelegate>(OnDirectionChangedDelegateSet);
+            foreach (TorqueChangedDelegate handler in copyOfDelegates)
+            {
+                handler(this);
+            }
+
+            return true;
         }
 
         public override string ToString()

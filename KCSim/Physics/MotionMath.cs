@@ -7,7 +7,7 @@ namespace KCSim.Physics
         {
             if (v1 == v2)
             {
-                return true;
+                return v1 != 0;
             }
             if (v1 == 0 || v2 == 0)
             {

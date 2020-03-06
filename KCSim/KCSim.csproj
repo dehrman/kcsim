@@ -11,4 +11,7 @@
     <Folder Include="Parts\Mechanical\" />
     <Folder Include="Parts\Logical\" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="SimpleInjector" Version="4.9.0" />
+  </ItemGroup>
 </Project>
