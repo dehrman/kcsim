@@ -6,10 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Parts\" />
     <Folder Include="Physics\" />
-    <Folder Include="Parts\Mechanical\" />
-    <Folder Include="Parts\Logical\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="SimpleInjector" Version="4.9.0" />

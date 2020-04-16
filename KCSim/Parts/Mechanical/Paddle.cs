@@ -14,7 +14,7 @@ namespace KCSim.Parts.Mechanical
         }
 
         public delegate void PaddleChangedDelegate(Paddle paddle, Position position);
-        public readonly ISet<PaddleChangedDelegate> OnPaddlePositionChangedDelegateSet =
+        public ISet<PaddleChangedDelegate> OnPaddlePositionChangedDelegateSet =
             new HashSet<PaddleChangedDelegate>();
 
         private const double IntermediateRestingPlaceDegrees = 90;

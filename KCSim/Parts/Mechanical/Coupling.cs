@@ -121,6 +121,13 @@ namespace KCSim.Parts.Mechanical
             return new Coupling<I, O>(input, output, (double)input.GetNumTeeth() / (double)output.GetNumTeeth(), couplingType, name);
         }
 
+        public static Coupling<I, O> NewLockedAxleCoupling<I, O>(I input, O output, String name = "")
+            where I : Axle
+            where O : Axle
+        {
+            return new Coupling<I, O>(input, output, 1, CouplingType.BidirectionalSymmetrical, name);
+        }
+
         public static Coupling<I, O> NewLockedGearToAxleCoupling<I, O>(I input, O output, String name = "")
             where I : Gear
             where O : Axle

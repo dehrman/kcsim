@@ -1,4 +1,6 @@
-﻿using KCSim.Physics;
+﻿using System;
+using KCSim.Physics;
+using static KCSim.Parts.Mechanical.Paddle;
 
 namespace KCSim.Parts.Mechanical
 {
@@ -9,9 +11,10 @@ namespace KCSim.Parts.Mechanical
         public readonly SmallGear InputGear;
         public readonly SmallGear OutputGear;
         public readonly Axle OutputAxle;
+        public readonly Paddle ArmPaddle;
 
         // functional properties of the part
-        private readonly bool isControlPositiveDirection;
+        private readonly bool isControlPaddlePositiveDirection;
         private readonly bool isInputPositiveDirection;
 
         // conditional couplings that are created and destroyed as the relay is enabled and disabled respectively
@@ -19,21 +22,18 @@ namespace KCSim.Parts.Mechanical
         private Coupling<SmallGear, SmallGear>? connectorToOutputCoupling;
 
         // fixed couplings
-        private readonly Coupling<Axle, Paddle> controlAxleToPaddleCoupling;
-        private readonly Coupling<Paddle, Paddle> paddleToPaddleCoupling;
-        private readonly Coupling<Paddle, Axle> paddleToArmFulcrumCoupling;
-        private readonly Coupling<Axle, Gear> armEndAxleToConnectorGearCoupling;
         private readonly SmallGear connector;
-        private readonly Coupling<Axle, SmallGear> inputAxleToInputGearCoupling;
-        private readonly Coupling<SmallGear, Axle> outputGearToOutputAxleCoupling;
 
         public Relay(
             IPaddleFactory paddleFactory,
             bool isControlPositiveDirection = true,
             bool isInputPositiveDirection = true)
         {
-            this.isControlPositiveDirection = isControlPositiveDirection;
             this.isInputPositiveDirection = isInputPositiveDirection;
+
+            // Because the control axle has an opposing coupling with the control paddle, we record the sign of the control paddle
+            // as the inverse of that of the control axle.
+            this.isControlPaddlePositiveDirection = !isControlPositiveDirection;
 
             InputAxle = new Axle("input axle");
             InputGear = new SmallGear("input gear");
@@ -43,7 +43,10 @@ namespace KCSim.Parts.Mechanical
             ControlAxle = new Axle("control axle");
 
             PaddleWheel controlPaddleWheel = new PaddleWheel();
-            Paddle armPaddle = paddleFactory.CreateNew();
+
+            armPaddle = paddleFactory.CreateNew();
+            armPaddle.OnPaddlePositionChangedDelegateSet.Add(OnPaddlePositionChanged);
+
             Arm arm = new Arm();
 
             // create fixed coupling for input
@@ -76,7 +79,6 @@ namespace KCSim.Parts.Mechanical
                 output: armPaddle,
                 inputToOutputRatio: 1,
                 couplingType: CouplingType.BidirectionalOpposing);
-            // PaddlePositionEvaluator paddlePositionEvaluator = new PaddlePositionEvaluator(paddleWheelToPaddleCoupling);
 
             // create fixed coupling for output
             Coupling<SmallGear, Axle>.NewLockedGearToAxleCoupling(
@@ -85,18 +87,41 @@ namespace KCSim.Parts.Mechanical
                 name: "output gear to output axle");
         }
 
-        private void doStuff()
+        private void OnPaddlePositionChanged(Paddle paddle, Position position)
         {
-            // initialize default couplings such that the relay is disengaged
+            // Check if the paddle is in the required direction to engage the relay; else return early.
+            if (isControlPaddlePositiveDirection && position != Position.Positive)
+            {
+                DisengageRelay();
+                return;
+            }
+            if (!isControlPaddlePositiveDirection && position != Position.Negative)
+            {
+                DisengageRelay();
+                return;
+            }
+
+            // At this point, we know that the paddle is in the position required to engage the relay, so let's engage it.
+            EngageRelay();
+        }
+
+        private void DisengageRelay()
+        {
+            inputToConnectorCoupling.Remove();
+            connectorToOutputCoupling.Remove();
+        }
+
+        private void EngageRelay()
+        {
             inputToConnectorCoupling = Coupling<SmallGear, SmallGear>.NewGearCoupling(
                 input: InputGear,
                 output: connector,
-                couplingType: CouplingType.FreeFlowing, // (isInputPositiveDirection ? CouplingType.OneWayPositive : CouplingType.OneWayNegative),
+                couplingType: isInputPositiveDirection ? CouplingType.OneWayPositive : CouplingType.OneWayNegative,
                 name: "input gear to connector gear");
             connectorToOutputCoupling = Coupling<SmallGear, SmallGear>.NewGearCoupling(
                 input: connector,
                 output: OutputGear,
-                couplingType: CouplingType.FreeFlowing, // (isInputPositiveDirection ? CouplingType.OneWayNegative : CouplingType.OneWayPositive),
+                couplingType: isInputPositiveDirection ? CouplingType.OneWayNegative : CouplingType.OneWayPositive,
                 name: "connector gear to output gear");
         }
     }
