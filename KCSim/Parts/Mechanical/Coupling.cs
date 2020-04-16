@@ -61,14 +61,14 @@ namespace KCSim.Parts.Mechanical
 
             if (newForces.Item1 != mostRecentInputToOutputForce)
             {
-                output.RemoveForce(mostRecentInputToOutputForce);
-                mostRecentInputToOutputForce = newForces.Item1;
+                mostRecentInputToOutputForce = new Force(newForces.Item1.Velocity);
+                output.RemoveForce(new Force(mostRecentInputToOutputForce.Velocity));
                 output.AddForce(mostRecentInputToOutputForce);
             }
             if (newForces.Item2 != mostRecentOutputToInputForce)
             {
-                input.RemoveForce(mostRecentOutputToInputForce);
-                mostRecentOutputToInputForce = newForces.Item2;
+                mostRecentOutputToInputForce = new Force(newForces.Item2.Velocity);
+                input.RemoveForce(new Force(mostRecentOutputToInputForce.Velocity));
                 input.AddForce(mostRecentOutputToInputForce);
             }
             AddListeners();
@@ -76,6 +76,8 @@ namespace KCSim.Parts.Mechanical
 
         private void OnInputNetForceChanged(Torqueable t)
         {
+            input.OnNetForceChangedDelegateSet.Remove(OnInputNetForceChanged);
+
             // Before evaluating net forces, we should first remove the previous net force that the input was applying
             // to the output.
             if (mostRecentInputToOutputForce != Force.ZeroForce)
@@ -86,10 +88,16 @@ namespace KCSim.Parts.Mechanical
             }
 
             EvaluateForces();
+
+            input.OnNetForceChangedDelegateSet.Add(OnInputNetForceChanged);
+
+            Console.WriteLine("Input force changed on coupling: " + ToString());
         }
 
         private void OnOutputNetForceChanged(Torqueable t)
         {
+            output.OnNetForceChangedDelegateSet.Remove(OnOutputNetForceChanged);
+
             // Before evaluating net forces, we should first remove the previous net force that the output was applying
             // to the input.
             if (mostRecentOutputToInputForce != Force.ZeroForce)
@@ -100,6 +108,10 @@ namespace KCSim.Parts.Mechanical
             }
 
             EvaluateForces();
+
+            output.OnNetForceChangedDelegateSet.Add(OnOutputNetForceChanged);
+
+            Console.WriteLine("Output force changed on coupling: " + ToString());
         }
 
         private void AddListeners()

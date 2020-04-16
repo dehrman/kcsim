@@ -5,7 +5,7 @@ using static KCSim.Parts.Mechanical.Paddle;
 
 namespace KCSim.Parts.Mechanical
 {
-    interface IRelayFactory
+    public interface IRelayFactory
     {
         Relay CreateNew(bool isControlPositiveDirection = true, bool isInputPositiveDirection = true);
     }

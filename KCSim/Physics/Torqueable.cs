@@ -59,7 +59,6 @@ namespace KCSim.Physics
                 throw new ArgumentException("Can't apply force " + force + " when counteracting force of "
                     + previousNetForce + " exists on " + ToString());
             }
-
             
             forces.Add(force);
             forces.Sort();
@@ -73,7 +72,7 @@ namespace KCSim.Physics
         protected virtual bool CheckAndNotifyForNetForceChange(Force previousNetForce)
         {
             Force netForce = GetNetForce();
-            if (previousNetForce == netForce)
+            if (previousNetForce.Equals(netForce))
             {
                 return false;
             }

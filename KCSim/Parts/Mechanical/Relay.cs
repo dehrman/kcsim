@@ -44,8 +44,8 @@ namespace KCSim.Parts.Mechanical
 
             PaddleWheel controlPaddleWheel = new PaddleWheel();
 
-            armPaddle = paddleFactory.CreateNew();
-            armPaddle.OnPaddlePositionChangedDelegateSet.Add(OnPaddlePositionChanged);
+            ArmPaddle = paddleFactory.CreateNew();
+            ArmPaddle.OnPaddlePositionChangedDelegateSet.Add(OnPaddlePositionChanged);
 
             Arm arm = new Arm();
 
@@ -62,7 +62,7 @@ namespace KCSim.Parts.Mechanical
                 inputToOutputRatio: 1,
                 couplingType: CouplingType.BidirectionalSymmetrical);
             new Coupling<Paddle, Axle>( // the paddle rotates the fulcrum axle
-                input: armPaddle,
+                input: ArmPaddle,
                 output: arm.FulcrumAxle,
                 inputToOutputRatio: 1,
                 couplingType: CouplingType.BidirectionalSymmetrical);
@@ -76,7 +76,7 @@ namespace KCSim.Parts.Mechanical
             // requires special handling here, via a separate evaluator class.
             Coupling<PaddleWheel, Paddle> paddleWheelToPaddleCoupling = new Coupling<PaddleWheel, Paddle>(
                 input: controlPaddleWheel,
-                output: armPaddle,
+                output: ArmPaddle,
                 inputToOutputRatio: 1,
                 couplingType: CouplingType.BidirectionalOpposing);
 
@@ -107,8 +107,14 @@ namespace KCSim.Parts.Mechanical
 
         private void DisengageRelay()
         {
-            inputToConnectorCoupling.Remove();
-            connectorToOutputCoupling.Remove();
+            if (inputToConnectorCoupling != null)
+            {
+                inputToConnectorCoupling.Remove();
+            }
+            if (connectorToOutputCoupling != null)
+            {
+                connectorToOutputCoupling.Remove();
+            }
         }
 
         private void EngageRelay()

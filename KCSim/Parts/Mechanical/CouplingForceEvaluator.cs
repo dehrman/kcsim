@@ -115,18 +115,6 @@ namespace KCSim.Parts.Mechanical
                 throw new DestructiveForceException(
                     "Opposing forces not allowed in bidirectional symmetrical coupling");
             }
-
-            if (couplingType == CouplingType.OneWayPositive && outputVelocity > 0)
-            {
-                throw new DestructiveForceException(
-                    "Positive output force not allowed in one-way-positive coupling");
-            }
-
-            if (couplingType == CouplingType.OneWayNegative && outputVelocity < 0)
-            {
-                throw new DestructiveForceException(
-                    "Negative output force not allowed in one-way-negative coupling");
-            }
         }
     }
 }

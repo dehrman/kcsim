@@ -1,4 +1,3 @@
-using System;
 using Xunit;
 
 using KCSim.Parts.Mechanical;
@@ -15,13 +14,13 @@ namespace KCSimTests
     public class RelayTests
     {
         private Relay relay;
-        private Mock<IPaddleFactory> mockPaddleFactory;
-        private Mock<IMotionTimer> mockMotionTimer;
 
         public RelayTests()
         {
-            SetupMocks();
-            relay = new Relay(paddleFactory: mockPaddleFactory.Object, isControlPositiveDirection: true, isInputPositiveDirection: true);
+            relay = new Relay(
+                paddleFactory: TestUtil.GetMockPaddleFactory().Object,
+                isControlPositiveDirection: true,
+                isInputPositiveDirection: true);
         }
 
         [Fact]
@@ -31,7 +30,7 @@ namespace KCSimTests
             Axle outputAxle = relay.OutputAxle;
 
             inputAxle.AddForce(new Force(1));
-            Assert.Equal(0, outputAxle.GetNetForce().Velocity);
+            Assert.Equal(Force.ZeroForce, outputAxle.GetNetForce());
         }
 
         [Fact]
@@ -44,7 +43,7 @@ namespace KCSimTests
             inputAxle.AddForce(new Force(1));
             controlAxle.AddForce(new Force(1));
 
-            Assert.Equal(1, outputAxle.GetNetForce().Velocity);
+            Assert.Equal(new Force(1), outputAxle.GetNetForce());
         }
 
         [Fact]
@@ -57,7 +56,7 @@ namespace KCSimTests
             inputAxle.AddForce(new Force(1));
             controlAxle.AddForce(new Force(-1));
 
-            Assert.Equal(0, outputAxle.GetNetForce().Velocity);
+            Assert.Equal(Force.ZeroForce, outputAxle.GetNetForce());
         }
 
         [Fact]
@@ -70,7 +69,7 @@ namespace KCSimTests
             inputAxle.AddForce(new Force(-1));
             controlAxle.AddForce(new Force(1));
 
-            Assert.Equal(0, outputAxle.GetNetForce().Velocity);
+            Assert.Equal(Force.ZeroForce, outputAxle.GetNetForce());
         }
 
         [Fact]
@@ -84,12 +83,12 @@ namespace KCSimTests
             
             // Start with the relay engaged.
             controlAxle.AddForce(new Force(1));
-            Assert.Equal(1, outputAxle.GetNetForce().Velocity);
+            Assert.Equal(new Force(1), outputAxle.GetNetForce());
 
             // Now remove the control force.
             controlAxle.RemoveAllForces();
 
-            Assert.Equal(1, outputAxle.GetNetForce().Velocity);
+            Assert.Equal(new Force(1), outputAxle.GetNetForce());
         }
 
         [Fact]
@@ -103,27 +102,13 @@ namespace KCSimTests
 
             // Start with the relay engaged.
             controlAxle.AddForce(new Force(1));
-            Assert.Equal(1, outputAxle.GetNetForce().Velocity);
+            Assert.Equal(new Force(1), outputAxle.GetNetForce());
 
             // Now disengage the relay.
             controlAxle.RemoveAllForces();
             controlAxle.AddForce(new Force(-1));
 
-            Assert.Equal(0, outputAxle.GetNetForce().Velocity);
-        }
-
-        private void SetupMocks()
-        {
-            mockPaddleFactory = new Mock<IPaddleFactory>();
-            mockMotionTimer = new Mock<IMotionTimer>();
-
-            // Set up the motion timer such that the delegate is invoked as soon as the timer is started.
-            mockMotionTimer.Setup(x => x.Start(It.IsAny<double>(), It.IsAny<double>(), It.IsAny<IMotionTimer.OnTimerCompletionDelegate>()))
-                .Callback<double, double, IMotionTimer.OnTimerCompletionDelegate>(
-                    (d, v, onTimerCompletionDelegate) => onTimerCompletionDelegate.Invoke(v));
-
-            Paddle paddle = new Paddle(mockMotionTimer.Object);
-            mockPaddleFactory.Setup(x => x.CreateNew(It.IsAny<Paddle.Position>(), It.IsAny<string>())).Returns(paddle);
+            Assert.Equal(Force.ZeroForce, outputAxle.GetNetForce());
         }
     }
 }
