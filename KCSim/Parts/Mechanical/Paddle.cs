@@ -46,18 +46,28 @@ namespace KCSim.Parts.Mechanical
             this.motionTimer = motionTimer;
         }
 
-        protected override bool CheckAndNotifyForNetForceChange(Force previousNetForce)
+        public override void AddForce(Force force)
         {
-            bool didForceChange = base.CheckAndNotifyForNetForceChange(previousNetForce);
-            if (!didForceChange)
+            base.AddForce(force);
+            if (Force.ZeroForce.Equals(force))
             {
-                return false;
+                return;
             }
-
-            ReinitializeTimer();
-
-            return true;
+            currentAngle = IntermediateRestingPlaceDegrees;
         }
+
+        //protected override bool CheckAndNotifyForNetForceChange(Force previousNetForce)
+        //{
+        //    bool didForceChange = base.CheckAndNotifyForNetForceChange(previousNetForce);
+        //    if (!didForceChange)
+        //    {
+        //        return false;
+        //    }
+
+        //    ReinitializeTimer();
+
+        //    return true;
+        //}
 
         protected override bool CheckAndNotifyForDirectionChange(Force previousNetForce)
         {
@@ -67,6 +77,7 @@ namespace KCSim.Parts.Mechanical
                 return false;
             }
 
+            NotifyPaddlePositionChanged();
             ReinitializeTimer();
 
             return true;
@@ -95,6 +106,11 @@ namespace KCSim.Parts.Mechanical
             // all forces should be removed.
             RemoveAllForces();
 
+            NotifyPaddlePositionChanged();
+        }
+
+        private void NotifyPaddlePositionChanged()
+        {
             // We must create a copy of the delegates before iterating through them in the event that the set is
             // modified from outside this class during the iteration.
             ISet<PaddleChangedDelegate> copyOfDelegates =

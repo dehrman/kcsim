@@ -44,7 +44,7 @@ namespace KCSim.Physics
             CheckAndNotifyForNetForceChange(previousNetForce);
         }
 
-        public void AddForce(Force force)
+        public virtual void AddForce(Force force)
         {
             if (forces.Contains(force))
             {

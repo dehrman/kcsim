@@ -7,6 +7,6 @@ namespace KCSim.Parts.Mechanical
 {
     public interface IRelayFactory
     {
-        Relay CreateNew(bool isControlPositiveDirection = true, bool isInputPositiveDirection = true);
+        Relay CreateNew(bool isControlPositiveDirection = true, bool isInputPositiveDirection = true, string name = "");
     }
 }

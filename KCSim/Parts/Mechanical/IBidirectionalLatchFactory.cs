@@ -5,8 +5,8 @@ using static KCSim.Parts.Mechanical.Paddle;
 
 namespace KCSim.Parts.Mechanical
 {
-    interface IBidirectionalLatchFactory
+    public interface IBidirectionalLatchFactory
     {
-        BidirectionalLatch CreateNew();
+        public BidirectionalLatch CreateNew(string name = "");
     }
 }

@@ -19,11 +19,11 @@ namespace KCSim.Parts.Mechanical
             this.isPositiveDirection = isPositiveDirection;
             this.name = name;
 
-            InputAxle = new Axle("diode input axle");
-            InputGear = new SmallGear("diode input gear");
-            connector = new SmallGear("diode connector gear");
-            OutputGear = new SmallGear("diode output gear");
-            OutputAxle = new Axle("diode output axle");
+            InputAxle = new Axle(name + "; diode input axle");
+            InputGear = new SmallGear(name + "; diode input gear");
+            connector = new SmallGear(name + "; diode connector gear");
+            OutputGear = new SmallGear(name + "; diode output gear");
+            OutputAxle = new Axle(name + "; diode output axle");
 
             Coupling<Axle, SmallGear>.NewLockedAxleToGearCoupling(
                 input: InputAxle,

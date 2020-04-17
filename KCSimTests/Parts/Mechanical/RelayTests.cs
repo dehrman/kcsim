@@ -38,7 +38,7 @@ namespace KCSimTests
         {
             Axle inputAxle = relay.InputAxle;
             Axle outputAxle = relay.OutputAxle;
-            Axle controlAxle = relay.ControlAxle;
+            Axle controlAxle = relay.Enable;
 
             inputAxle.AddForce(new Force(1));
             controlAxle.AddForce(new Force(1));
@@ -51,7 +51,7 @@ namespace KCSimTests
         {
             Axle inputAxle = relay.InputAxle;
             Axle outputAxle = relay.OutputAxle;
-            Axle controlAxle = relay.ControlAxle;
+            Axle controlAxle = relay.Enable;
 
             inputAxle.AddForce(new Force(1));
             controlAxle.AddForce(new Force(-1));
@@ -64,7 +64,7 @@ namespace KCSimTests
         {
             Axle inputAxle = relay.InputAxle;
             Axle outputAxle = relay.OutputAxle;
-            Axle controlAxle = relay.ControlAxle;
+            Axle controlAxle = relay.Enable;
 
             inputAxle.AddForce(new Force(-1));
             controlAxle.AddForce(new Force(1));
@@ -77,7 +77,7 @@ namespace KCSimTests
         {
             Axle inputAxle = relay.InputAxle;
             Axle outputAxle = relay.OutputAxle;
-            Axle controlAxle = relay.ControlAxle;
+            Axle controlAxle = relay.Enable;
 
             inputAxle.AddForce(new Force(1));
             
@@ -96,7 +96,7 @@ namespace KCSimTests
         {
             Axle inputAxle = relay.InputAxle;
             Axle outputAxle = relay.OutputAxle;
-            Axle controlAxle = relay.ControlAxle;
+            Axle controlAxle = relay.Enable;
 
             inputAxle.AddForce(new Force(1));
 

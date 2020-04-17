@@ -6,7 +6,7 @@ namespace KCSim.Parts.Mechanical
 {
     public class Relay
     {
-        public readonly Axle ControlAxle;
+        public readonly Axle Enable;
         public readonly Axle InputAxle;
         public readonly SmallGear InputGear;
         public readonly SmallGear OutputGear;
@@ -24,27 +24,32 @@ namespace KCSim.Parts.Mechanical
         // fixed couplings
         private readonly SmallGear connector;
 
+        private readonly string name;
+
         public Relay(
             IPaddleFactory paddleFactory,
             bool isControlPositiveDirection = true,
-            bool isInputPositiveDirection = true)
+            bool isInputPositiveDirection = true,
+            string name = "")
         {
+            this.name = name;
+
             this.isInputPositiveDirection = isInputPositiveDirection;
 
             // Because the control axle has an opposing coupling with the control paddle, we record the sign of the control paddle
             // as the inverse of that of the control axle.
             this.isControlPaddlePositiveDirection = !isControlPositiveDirection;
 
-            InputAxle = new Axle("input axle");
-            InputGear = new SmallGear("input gear");
-            connector = new SmallGear("connector gear");
-            OutputGear = new SmallGear("output gear");
-            OutputAxle = new Axle("output axle");
-            ControlAxle = new Axle("control axle");
+            InputAxle = new Axle(name + "; input axle");
+            InputGear = new SmallGear(name + "; input gear");
+            connector = new SmallGear(name + "; connector gear");
+            OutputGear = new SmallGear(name + "; output gear");
+            OutputAxle = new Axle(name + "; output axle");
+            Enable = new Axle(name + "; control axle");
 
-            PaddleWheel controlPaddleWheel = new PaddleWheel();
+            PaddleWheel controlPaddleWheel = new PaddleWheel(name + "; paddle wheel");
 
-            ArmPaddle = paddleFactory.CreateNew();
+            ArmPaddle = paddleFactory.CreateNew(name: name + "; paddle");
             ArmPaddle.OnPaddlePositionChangedDelegateSet.Add(OnPaddlePositionChanged);
 
             Arm arm = new Arm();
@@ -57,7 +62,7 @@ namespace KCSim.Parts.Mechanical
 
             // create fixed couplings for the control mechanism (paddle wheel, paddle, arm, and connector)
             new Coupling<Axle, PaddleWheel>( // the control axle rotates the paddle wheel
-                input: ControlAxle,
+                input: Enable,
                 output: controlPaddleWheel,
                 inputToOutputRatio: 1,
                 couplingType: CouplingType.BidirectionalSymmetrical);
@@ -89,7 +94,12 @@ namespace KCSim.Parts.Mechanical
 
         private void OnPaddlePositionChanged(Paddle paddle, Position position)
         {
-            // Check if the paddle is in the required direction to engage the relay; else return early.
+            // If the paddle is not in the required position to engage the relay, ensure that it is disengaged.
+            if (position == Position.Intermediate)
+            {
+                DisengageRelay();
+                return;
+            }
             if (isControlPaddlePositiveDirection && position != Position.Positive)
             {
                 DisengageRelay();
@@ -129,6 +139,11 @@ namespace KCSim.Parts.Mechanical
                 output: OutputGear,
                 couplingType: isInputPositiveDirection ? CouplingType.OneWayNegative : CouplingType.OneWayPositive,
                 name: "connector gear to output gear");
+        }
+
+        public override string ToString()
+        {
+            return name;
         }
     }
 }

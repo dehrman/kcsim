@@ -9,9 +9,9 @@
             this.relayFactory = relayFactory;
         }
 
-        public BidirectionalLatch CreateNew()
+        public BidirectionalLatch CreateNew(string name = "")
         {
-            return new BidirectionalLatch(relayFactory);
+            return new BidirectionalLatch(relayFactory, name: name);
         }
     }
 }

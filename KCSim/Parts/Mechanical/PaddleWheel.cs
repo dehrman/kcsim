@@ -5,7 +5,7 @@ namespace KCSim.Parts.Mechanical
 {
     public class PaddleWheel : Torqueable
     {
-        public PaddleWheel()
+        public PaddleWheel(string name = "") : base(name)
         {
         }
     }

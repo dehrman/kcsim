@@ -39,12 +39,19 @@ namespace KCSimTests
         {
             Mock<IRelayFactory> mockRelayFactory = new Mock<IRelayFactory>();
             Mock<IPaddleFactory> mockPaddleFactory = GetMockPaddleFactory();
-            // mockRelayFactory.Setup(x => x.CreateNew(It.Is<bool>(x => true), It.Is<bool>(x => true))
-            mockRelayFactory.Setup(x => x.CreateNew(It.IsAny<bool>(), It.IsAny<bool>()))
-                .Returns<bool, bool>((isControlPositive, isInputPositive) =>
-                    new Relay(mockPaddleFactory.Object, isControlPositive, isInputPositive)
+            mockRelayFactory.Setup(x => x.CreateNew(It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<string>()))
+                .Returns<bool, bool, string>((isControlPositive, isInputPositive, name) =>
+                    new Relay(mockPaddleFactory.Object, isControlPositive, isInputPositive, name)
                 );
             return mockRelayFactory;
+        }
+
+        public static Mock<IBidirectionalLatchFactory> GetMockBidirectionalLatchFactory()
+        {
+            Mock<IBidirectionalLatchFactory> mockBidirectionalLatchFactory = new Mock<IBidirectionalLatchFactory>();
+            mockBidirectionalLatchFactory.Setup(x => x.CreateNew(It.IsAny<string>()))
+                .Returns<string>((name) => new BidirectionalLatch(GetMockRelayFactory().Object, name: name));
+            return mockBidirectionalLatchFactory;
         }
     }
 }

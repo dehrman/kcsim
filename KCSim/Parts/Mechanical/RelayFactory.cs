@@ -13,9 +13,13 @@ namespace KCSim.Parts.Mechanical
             this.paddleFactory = paddleFactory;
         }
 
-        public Relay CreateNew(bool isControlPositiveDirection = true, bool isInputPositiveDirection = true)
+        public Relay CreateNew(bool isControlPositiveDirection = true, bool isInputPositiveDirection = true, string name = "")
         {
-            return new Relay(paddleFactory: paddleFactory, isControlPositiveDirection: isControlPositiveDirection, isInputPositiveDirection: isInputPositiveDirection);
+            return new Relay(
+                paddleFactory: paddleFactory,
+                isControlPositiveDirection: isControlPositiveDirection,
+                isInputPositiveDirection: isInputPositiveDirection,
+                name: name);
         }
     }
 }
