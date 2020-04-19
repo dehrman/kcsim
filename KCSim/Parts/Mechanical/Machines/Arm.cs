@@ -1,4 +1,6 @@
 ﻿using System;
+using KCSim.Parts.Mechanical.Atomic;
+
 namespace KCSim.Parts.Mechanical
 {
     /*

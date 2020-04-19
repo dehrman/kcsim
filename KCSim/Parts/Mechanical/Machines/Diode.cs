@@ -1,4 +1,5 @@
 ﻿using System;
+using KCSim.Parts.Mechanical.Atomic;
 using KCSim.Physics;
 
 namespace KCSim.Parts.Mechanical
@@ -14,7 +15,10 @@ namespace KCSim.Parts.Mechanical
         private readonly bool isPositiveDirection;
         private readonly string name;
 
-        public Diode(bool isPositiveDirection = true, string name = "default diode name")
+        public Diode(
+            ICouplingService couplingService,
+            Direction direction,
+            string name = "default diode name")
         {
             this.isPositiveDirection = isPositiveDirection;
             this.name = name;
@@ -25,21 +29,21 @@ namespace KCSim.Parts.Mechanical
             OutputGear = new SmallGear(name + "; diode output gear");
             OutputAxle = new Axle(name + "; diode output axle");
 
-            Coupling<Axle, SmallGear>.NewLockedAxleToGearCoupling(
+            couplingService.CreateNewLockedCoupling(
                 input: InputAxle,
                 output: InputGear,
                 name: "diode input axle to input gear");
-            Coupling<SmallGear, SmallGear>.NewGearCoupling(
+            couplingService.CreateNewOneWayCoupling(
                 input: InputGear,
                 output: connector,
-                couplingType: (isPositiveDirection ? CouplingType.OneWayPositive : CouplingType.OneWayNegative),
+                direction: direction,
                 name: "diode input gear to connector gear");
-            Coupling<SmallGear, SmallGear>.NewGearCoupling(
+            couplingService.CreateNewOneWayCoupling(
                 input: connector,
                 output: OutputGear,
-                couplingType: (isPositiveDirection ? CouplingType.OneWayNegative : CouplingType.OneWayPositive),
+                direction: direction.Opposite(),
                 name: "diode connector gear to output gear");
-            Coupling<SmallGear, Axle>.NewLockedGearToAxleCoupling(
+            couplingService.CreateNewLockedCoupling(
                 input: OutputGear,
                 output: OutputAxle,
                 name: "diode output gear to output axle");

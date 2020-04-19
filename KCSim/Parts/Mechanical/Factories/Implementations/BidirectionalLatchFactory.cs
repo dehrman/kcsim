@@ -2,16 +2,20 @@
 {
     class BidirectionalLatchFactory : IBidirectionalLatchFactory
     {
+        private readonly ICouplingService couplingService;
         private readonly IRelayFactory relayFactory;
 
-        BidirectionalLatchFactory(IRelayFactory relayFactory)
+        BidirectionalLatchFactory(
+            ICouplingService couplingService,
+            IRelayFactory relayFactory)
         {
+            this.couplingService = couplingService;
             this.relayFactory = relayFactory;
         }
 
         public BidirectionalLatch CreateNew(string name = "")
         {
-            return new BidirectionalLatch(relayFactory, name: name);
+            return new BidirectionalLatch(couplingService, relayFactory, name: name);
         }
     }
 }

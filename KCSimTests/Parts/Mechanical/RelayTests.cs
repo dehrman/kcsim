@@ -1,9 +1,10 @@
 using Xunit;
-
-using KCSim.Parts.Mechanical;
 using KCSim.Physics;
 using Moq;
 using KCSim;
+using KCSim.Parts.Mechanical.Atomic;
+using KCSim.Parts.Mechanical.Machines;
+using KCSim.Physics.Couplings;
 
 namespace KCSimTests
 {
@@ -13,14 +14,25 @@ namespace KCSimTests
      */
     public class RelayTests
     {
+        private TestUtil testUtil = new TestUtil();
+
+        private readonly Coupling enableCoupling;
+        private readonly Coupling inputCoupling;
         private Relay relay;
 
         public RelayTests()
         {
+            ICouplingService couplingService = testUtil.GetSingletonCouplingService();
             relay = new Relay(
-                paddleFactory: TestUtil.GetMockPaddleFactory().Object,
-                isControlPositiveDirection: true,
-                isInputPositiveDirection: true);
+                couplingService: couplingService,
+                paddleFactory: testUtil.GetMockPaddleFactory().Object,
+                enableDirection: Direction.Positive,
+                inputDirection: Direction.Positive);
+
+            var enable = new HumanSwitch();
+            var input = new HumanSwitch();
+            enableCoupling = couplingService.CreateNewLockedCoupling(enable, relay.Enable);
+            inputCoupling = couplingService.CreateNewLockedCoupling(input, relay.InputAxle);
         }
 
         [Fact]
@@ -29,7 +41,7 @@ namespace KCSimTests
             Axle inputAxle = relay.InputAxle;
             Axle outputAxle = relay.OutputAxle;
 
-            inputAxle.AddForce(new Force(1));
+            inputAxle.UpdateForce(inputCoupling, new Force(1));
             Assert.Equal(Force.ZeroForce, outputAxle.GetNetForce());
         }
 
@@ -40,8 +52,8 @@ namespace KCSimTests
             Axle outputAxle = relay.OutputAxle;
             Axle controlAxle = relay.Enable;
 
-            inputAxle.AddForce(new Force(1));
-            controlAxle.AddForce(new Force(1));
+            inputAxle.UpdateForce(inputCoupling, new Force(1));
+            controlAxle.UpdateForce(enableCoupling, new Force(1));
 
             Assert.Equal(new Force(1), outputAxle.GetNetForce());
         }
@@ -53,8 +65,8 @@ namespace KCSimTests
             Axle outputAxle = relay.OutputAxle;
             Axle controlAxle = relay.Enable;
 
-            inputAxle.AddForce(new Force(1));
-            controlAxle.AddForce(new Force(-1));
+            inputAxle.UpdateForce(inputCoupling, new Force(1));
+            controlAxle.UpdateForce(enableCoupling, new Force(-1));
 
             Assert.Equal(Force.ZeroForce, outputAxle.GetNetForce());
         }
@@ -66,8 +78,8 @@ namespace KCSimTests
             Axle outputAxle = relay.OutputAxle;
             Axle controlAxle = relay.Enable;
 
-            inputAxle.AddForce(new Force(-1));
-            controlAxle.AddForce(new Force(1));
+            inputAxle.UpdateForce(inputCoupling, new Force(-1));
+            controlAxle.UpdateForce(enableCoupling, new Force(1));
 
             Assert.Equal(Force.ZeroForce, outputAxle.GetNetForce());
         }
@@ -79,10 +91,10 @@ namespace KCSimTests
             Axle outputAxle = relay.OutputAxle;
             Axle controlAxle = relay.Enable;
 
-            inputAxle.AddForce(new Force(1));
+            inputAxle.UpdateForce(inputCoupling, new Force(1));
             
             // Start with the relay engaged.
-            controlAxle.AddForce(new Force(1));
+            controlAxle.UpdateForce(enableCoupling, new Force(1));
             Assert.Equal(new Force(1), outputAxle.GetNetForce());
 
             // Now remove the control force.
@@ -98,15 +110,15 @@ namespace KCSimTests
             Axle outputAxle = relay.OutputAxle;
             Axle controlAxle = relay.Enable;
 
-            inputAxle.AddForce(new Force(1));
+            inputAxle.UpdateForce(inputCoupling, new Force(1));
 
             // Start with the relay engaged.
-            controlAxle.AddForce(new Force(1));
+            controlAxle.UpdateForce(enableCoupling, new Force(1));
             Assert.Equal(new Force(1), outputAxle.GetNetForce());
 
             // Now disengage the relay.
             controlAxle.RemoveAllForces();
-            controlAxle.AddForce(new Force(-1));
+            controlAxle.UpdateForce(enableCoupling, new Force(-1));
 
             Assert.Equal(Force.ZeroForce, outputAxle.GetNetForce());
         }

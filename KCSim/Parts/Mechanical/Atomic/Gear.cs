@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using KCSim.Physics;
 
-namespace KCSim.Parts.Mechanical
+namespace KCSim.Parts.Mechanical.Atomic
 {
     public abstract class Gear : Torqueable
     {
-        public Gear(string name="") : base(name)
+        public Gear(string name = "") : base(name)
         {
         }
 

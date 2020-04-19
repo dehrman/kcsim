@@ -1,7 +1,7 @@
 ﻿using System;
 using KCSim.Physics;
 
-namespace KCSim.Parts.Mechanical
+namespace KCSim.Parts.Mechanical.Atomic
 {
     public class SmallGear : Gear
     {

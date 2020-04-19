@@ -31,17 +31,6 @@ namespace KCSim.Physics
             return Math.Abs(this.Velocity).CompareTo(Math.Abs(other.Velocity));
         }
 
-        public override bool Equals(object obj)
-        {
-            return obj is Force force &&
-                   Velocity == force.Velocity;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Velocity);
-        }
-
         public override string ToString()
         {
             return Velocity.ToString();

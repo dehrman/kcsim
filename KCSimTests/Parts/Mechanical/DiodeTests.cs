@@ -3,18 +3,30 @@ using Xunit;
 
 using KCSim.Parts.Mechanical;
 using KCSim.Physics;
+using KCSim.Parts.Mechanical.Atomic;
+using KCSim.Physics.Couplings;
+using KCSim;
+using KCSim.Parts.Mechanical.Machines;
 
 namespace KCSimTests
 {
     public class DiodeTests
     {
-        private Diode positiveDiode;
-        private Diode negativeDiode;
+        private TestUtil testUtil = new TestUtil();
+
+        private readonly Coupling inputCoupling;
+        private readonly Diode positiveDiode;
+        private readonly Diode negativeDiode;
 
         public DiodeTests()
         {
-            positiveDiode = new Diode(isPositiveDirection: true);
-            negativeDiode = new Diode(isPositiveDirection: false);
+            ICouplingService couplingService = testUtil.GetSingletonCouplingService();
+            positiveDiode = new Diode(couplingService, Direction.Positive);
+            negativeDiode = new Diode(couplingService, Direction.Negative);
+
+            var input = new HumanSwitch();
+            inputCoupling = couplingService.CreateNewLockedCoupling(input, positiveDiode.InputAxle);
+            inputCoupling = couplingService.CreateNewLockedCoupling(input, negativeDiode.InputAxle);
         }
 
         [Theory]
@@ -24,7 +36,7 @@ namespace KCSimTests
         {
             Axle inputAxle = positiveDiode.InputAxle;
             Axle outputAxle = positiveDiode.OutputAxle;
-            inputAxle.AddForce(new Force(value));
+            inputAxle.UpdateForce(inputCoupling, new Force(value));
             Assert.Equal(value, outputAxle.GetNetForce().Velocity);
         }
 
@@ -33,9 +45,9 @@ namespace KCSimTests
         {
             Axle inputAxle = positiveDiode.InputAxle;
             Axle outputAxle = positiveDiode.OutputAxle;
-            inputAxle.AddForce(new Force(1));
-            inputAxle.AddForce(new Force(3));
-            inputAxle.AddForce(new Force(2));
+            inputAxle.UpdateForce(inputCoupling, new Force(1));
+            inputAxle.UpdateForce(inputCoupling, new Force(3));
+            inputAxle.UpdateForce(inputCoupling, new Force(2));
             Assert.Equal(3, outputAxle.GetNetForce().Velocity);
         }
 
@@ -44,11 +56,11 @@ namespace KCSimTests
         {
             Axle inputAxle = positiveDiode.InputAxle;
             Axle outputAxle = positiveDiode.OutputAxle;
-            inputAxle.AddForce(new Force(1));
+            inputAxle.UpdateForce(inputCoupling, new Force(1));
             Force force3 = new Force(3);
-            inputAxle.AddForce(force3);
-            inputAxle.AddForce(new Force(2));
-            inputAxle.RemoveForce(force3);
+            inputAxle.UpdateForce(inputCoupling, force3);
+            inputAxle.UpdateForce(inputCoupling, new Force(2));
+            inputAxle.UpdateForce(inputCoupling, Force.ZeroForce);
             Assert.Equal(2, outputAxle.GetNetForce().Velocity);
         }
 
@@ -59,7 +71,7 @@ namespace KCSimTests
 
             Console.WriteLine("Adding negative slow force on input axle");
             inputAxle.RemoveAllForces();
-            inputAxle.AddForce(new Force(-1));
+            inputAxle.UpdateForce(inputCoupling, new Force(-1));
             printState();
 
             Console.WriteLine("Removing all forces on input axle...");
@@ -67,9 +79,9 @@ namespace KCSimTests
             printState();
 
             Console.WriteLine("Adding positive fast force on output axle...");
-            outputAxle.AddForce(doubleForce);
+            outputAxle.UpdateForce(inputCoupling, doubleForce);
             Console.WriteLine("Adding positive slow force on input axle");
-            inputAxle.AddForce(new Force(1));
+            inputAxle.UpdateForce(inputCoupling, new Force(1));
             printState();
 
             Console.WriteLine("Removing positive fast force on output axle...");

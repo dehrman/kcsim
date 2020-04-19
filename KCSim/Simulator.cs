@@ -1,5 +1,6 @@
 ﻿using System;
 using KCSim.Parts.Mechanical;
+using KCSim.Parts.Mechanical.Atomic;
 using KCSim.Physics;
 
 namespace KCSim
@@ -12,17 +13,19 @@ namespace KCSim
 
         public Simulator()
         {
+            /*
             diode = new Diode(isPositiveDirection: true);
 
             inputAxle = diode.InputAxle;
             outputAxle = diode.OutputAxle;
+            */
         }
 
         public void runDiodeTest()
         {
             Console.WriteLine("Running diode test...");
             printState();
-
+            /*
             Console.WriteLine("Adding positive slow force on input axle...");
             inputAxle.AddForce(new Force(1));
             printState();
@@ -54,6 +57,7 @@ namespace KCSim
             Console.WriteLine("Removing positive fast force on output axle...");
             outputAxle.RemoveForce(doubleForce);
             printState();
+            */
         }
 
         private void printState()

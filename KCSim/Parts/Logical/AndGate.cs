@@ -1,4 +1,5 @@
 ﻿using KCSim.Parts.Mechanical;
+using KCSim.Parts.Mechanical.Atomic;
 
 namespace KCSim.Parts.Logical
 {
@@ -9,25 +10,28 @@ namespace KCSim.Parts.Logical
         public readonly Axle InputB = new Axle("AND gate inputB");
         public readonly Axle Output = new Axle("AND gate output");
 
-        public AndGate(IBidirectionalLatchFactory bidirectionalLatchFactory) : base("AND gate")
+        public AndGate(
+            ICouplingService couplingService,
+            IBidirectionalLatchFactory bidirectionalLatchFactory)
+            : base("AND gate")
         {
             // Create a bidirectional latch for each input.
             BidirectionalLatch inputLatchA = bidirectionalLatchFactory.CreateNew("AND gate inputLatchA");
             BidirectionalLatch inputLatchB = bidirectionalLatchFactory.CreateNew("AND gate inputLatchB");
 
             // Connect the inputs to the latches.
-            Coupling<Axle, Axle>.NewLockedAxleCoupling(InputA, inputLatchA.Input);
-            Coupling<Axle, Axle>.NewLockedAxleCoupling(InputB, inputLatchB.Input);
+            couplingService.CreateNewLockedCoupling(InputA, inputLatchA.Input);
+            couplingService.CreateNewLockedCoupling(InputB, inputLatchB.Input);
 
             // Connect the power to inputLatchA.
-            Coupling<Axle, Axle>.NewLockedAxleCoupling(Power, inputLatchA.Power);
+            couplingService.CreateNewLockedCoupling(Power, inputLatchA.Power);
 
             // If inputA is false, inputLatchB is not powered....
-            Coupling<Axle, Axle>.NewLockedAxleCoupling(inputLatchA.OutputAxlePositive, inputLatchB.Power);
+            couplingService.CreateNewLockedCoupling(inputLatchA.OutputAxlePositive, inputLatchB.Power);
             
             // But that's OK, because if inputA is false, the AND gate's output will still be false
             // because it's coupled to inputLatchA's negative output axle.
-            Coupling<Axle, Axle>.NewLockedAxleCoupling(
+            couplingService.CreateNewLockedCoupling(
                 inputLatchA.OutputAxleNegative,
                 Output,
                 "coupling from inputLatchA's negative output to the AND gate's output");
@@ -38,11 +42,11 @@ namespace KCSim.Parts.Logical
             // that its two outputs are never engaged at the same time. Therefore, any backpressure from one
             // output axle to another terminates roughly at the point at which the disengaged axle leaves the
             // relay.
-            Coupling<Axle, Axle>.NewLockedAxleCoupling(
+            couplingService.CreateNewLockedCoupling(
                 inputLatchB.OutputAxleNegative,
                 Output,
                 "coupling from inputLatchB's negative output to the And gate's output");
-            Coupling<Axle, Axle>.NewLockedAxleCoupling(
+            couplingService.CreateNewLockedCoupling(
                 inputLatchB.OutputAxlePositive,
                 Output,
                 "coupling from inputLatchB's positive output the the AND gate's output");

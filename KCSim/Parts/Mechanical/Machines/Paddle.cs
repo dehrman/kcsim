@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using KCSim.Physics;
+using KCSim.Physics.Couplings;
 
 namespace KCSim.Parts.Mechanical
 {
@@ -46,40 +47,24 @@ namespace KCSim.Parts.Mechanical
             this.motionTimer = motionTimer;
         }
 
-        public override void AddForce(Force force)
+        public override bool UpdateForce(Coupling coupling, Force force)
         {
-            base.AddForce(force);
-            if (Force.ZeroForce.Equals(force))
-            {
-                return;
-            }
-            currentAngle = IntermediateRestingPlaceDegrees;
-        }
-
-        //protected override bool CheckAndNotifyForNetForceChange(Force previousNetForce)
-        //{
-        //    bool didForceChange = base.CheckAndNotifyForNetForceChange(previousNetForce);
-        //    if (!didForceChange)
-        //    {
-        //        return false;
-        //    }
-
-        //    ReinitializeTimer();
-
-        //    return true;
-        //}
-
-        protected override bool CheckAndNotifyForDirectionChange(Force previousNetForce)
-        {
-            bool didDirectionChange = base.CheckAndNotifyForDirectionChange(previousNetForce);
-            if (!didDirectionChange)
+            Force oldForce = GetNetForce();
+            bool isForceDifferent = base.UpdateForce(coupling, force);
+            
+            // If there's no change in force, break early.
+            if (!isForceDifferent)
             {
                 return false;
             }
 
-            NotifyPaddlePositionChanged();
-            ReinitializeTimer();
-
+            // If the direction changed, reset the motion timer.
+            if (MotionMath.IsDifferentDirection(oldForce.Velocity, GetNetForce().Velocity))
+            {
+                currentAngle = IntermediateRestingPlaceDegrees;
+                ReinitializeTimer();
+            }
+            
             return true;
         }
 
