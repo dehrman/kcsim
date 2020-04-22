@@ -3,7 +3,7 @@ using KCSim.Parts.Mechanical.Atomic;
 
 namespace KCSim.Parts.Logical
 {
-    public class XorGate : BinaryGate
+    public class XorGate : Gate
     {
         public readonly Axle Power = new Axle("XOR gate power");
         public readonly Axle InputA = new Axle("XOR gate inputA");

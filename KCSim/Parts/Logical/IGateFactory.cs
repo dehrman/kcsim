@@ -15,5 +15,9 @@ namespace KCSim.Parts.Logical
         NandGate CreateNewNandGate();
 
         XorGate CreateNewXorGate();
+
+        NorGate CreateNewNorGate();
+
+        Buffer CreateNewBuffer();
     }
 }

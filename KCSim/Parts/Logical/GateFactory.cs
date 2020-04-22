@@ -71,5 +71,17 @@ namespace KCSim.Parts.Logical
             var orGate = CreateNewOrGate();
             return new XorGate(couplingService, nandGate, andGate, orGate);
         }
+
+        public NorGate CreateNewNorGate()
+        {
+            var orGate = CreateNewOrGate();
+            var notGate = CreateNewNotGate();
+            return new NorGate(couplingService, orGate, notGate);
+        }
+
+        public Buffer CreateNewBuffer()
+        {
+            return new Buffer(couplingService, bidirectionalLatchFactory);
+        }
     }
 }

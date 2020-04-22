@@ -11,7 +11,7 @@ namespace KCSimTests
 {
     public class BidirectionalLatchTests
     {
-        private TestUtil testUtil = new TestUtil();
+        private readonly TestUtil testUtil = new TestUtil();
         private readonly ICouplingMonitor couplingMonitor;
         private readonly ICouplingService couplingService;
 

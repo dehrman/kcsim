@@ -5,13 +5,13 @@ using KCSim.Parts.Mechanical.Atomic;
 
 namespace KCSim.Parts.Logical
 {
-    public class NotGate
+    public class NotGate : Gate
     {
         public readonly Axle Input = new Axle("NOT gate input");
         public readonly Axle Output = new Axle("NOT gate output");
 
         public NotGate(
-            ICouplingService couplingService)
+            ICouplingService couplingService) : base("NOT gate")
         {
             Gear inputGear = new MediumGear();
             couplingService.CreateNewLockedCoupling(Input, inputGear);

@@ -8,7 +8,7 @@ namespace KCSimTests.Parts.Logical
 {
     public class XorGateTests
     {
-        private TestUtil testUtil = new TestUtil();
+        private readonly TestUtil testUtil = new TestUtil();
         private readonly ICouplingMonitor couplingMonitor;
         private readonly ICouplingService couplingService;
 

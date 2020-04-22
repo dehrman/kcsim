@@ -3,7 +3,7 @@ using KCSim.Parts.Mechanical.Atomic;
 
 namespace KCSim.Parts.Logical
 {
-    public class NandGate : BinaryGate
+    public class NandGate : Gate
     {
         public readonly Axle Power = new Axle("NAND gate power");
         public readonly Axle InputA = new Axle("NAND gate inputA");

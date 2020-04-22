@@ -6,43 +6,35 @@ using Xunit;
 
 namespace KCSimTests.Parts.Logical
 {
-    public class OrGateTests
+    public class NotGateTests
     {
-        private TestUtil testUtil = new TestUtil();
+        private readonly TestUtil testUtil = new TestUtil();
         private readonly ICouplingMonitor couplingMonitor;
         private readonly ICouplingService couplingService;
 
-        private readonly ExternalSwitch inputASwitch = new ExternalSwitch();
-        private readonly ExternalSwitch inputBSwitch = new ExternalSwitch();
-        private readonly ExternalSwitch motor = new ExternalSwitch();
-        private readonly OrGate orGate;
+        private readonly ExternalSwitch inputSwitch = new ExternalSwitch();
+        private readonly NotGate notGate;
 
-        public OrGateTests()
+        public NotGateTests()
         {
             couplingMonitor = testUtil.GetSingletonCouplingMonitor();
             couplingService = testUtil.GetSingletonCouplingService();
 
             var gateFactory = new GateFactory(couplingService, testUtil.GetMockBidirectionalLatchFactory().Object);
-            orGate = gateFactory.CreateNewOrGate();
+            notGate = gateFactory.CreateNewNotGate();
 
-            couplingService.CreateNewLockedCoupling(inputASwitch, orGate.InputA);
-            couplingService.CreateNewLockedCoupling(inputBSwitch, orGate.InputB);
-            couplingService.CreateNewLockedCoupling(motor, orGate.Power);
-
-            motor.Force = new Force(1);
+            couplingService.CreateNewLockedCoupling(inputSwitch, notGate.Input);
         }
 
         [Theory]
-        [InlineData(-1, -1, -1)]
-        [InlineData(-1, 1, 1)]
-        [InlineData(1, -1, 1)]
-        [InlineData(1, 1, 1)]
-        public void TestThat_TruthTableHolds(int inputA, int inputB, int expectedOutput)
+        [InlineData(-1, 1)]
+        [InlineData(1, -1)]
+        [InlineData(0, 0)]
+        public void TestThat_TruthTableHolds(int input, int expectedOutput)
         {
-            inputASwitch.Force = new Force(inputA);
-            inputBSwitch.Force = new Force(inputB);
+            inputSwitch.Force = new Force(input);
             couplingMonitor.EvaluateForces();
-            Assert.Equal(new Force(expectedOutput), orGate.Output.GetNetForce());
+            Assert.Equal(new Force(expectedOutput), notGate.Output.GetNetForce());
         }
     }
 }

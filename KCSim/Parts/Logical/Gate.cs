@@ -2,11 +2,11 @@
 
 namespace KCSim.Parts.Logical
 {
-    public abstract class BinaryGate
+    public abstract class Gate
     {
         private readonly string name;
 
-        public BinaryGate(string name = "")
+        public Gate(string name)
         {
             this.name = name;
         }
