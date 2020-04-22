@@ -7,40 +7,40 @@ namespace KCSim.Physics
 {
     public class Torqueable
     {
-        private readonly Dictionary<Coupling, Force> couplingsToForces;
+        private readonly Dictionary<Torqueable, Force> forces;
         private readonly string name;
 
         public Torqueable(string name="")
         {
-            this.couplingsToForces = new Dictionary<Coupling, Force>();
+            this.forces = new Dictionary<Torqueable, Force>();
             this.name = name;
         }
 
         public Force GetNetForce()
         {
-            if (couplingsToForces.Count == 0)
+            return GetNetForceAndSource().Value;
+        }
+        
+        public virtual KeyValuePair<Torqueable, Force> GetNetForceAndSource()
+        {
+            if (this.forces.Count == 0)
             {
-                return Force.ZeroForce;
+                return new KeyValuePair<Torqueable, Force>(this, Force.ZeroForce);
             }
-            var forces = couplingsToForces.Values.ToList();
-            forces.Sort();
-            return forces[forces.Count - 1];
+            return forces.OrderByDescending(kvp => kvp.Value).ElementAt(0);
         }
 
-        /**
-         * return true if the net force changed.
-         */
-        public virtual bool UpdateForce(Coupling coupling, Force force)
+        public virtual bool UpdateForce(Torqueable source, Force force)
         {
-            Force previousNetForce = GetNetForce();
-            couplingsToForces[coupling] = force;
-            return GetNetForce().Velocity != previousNetForce.Velocity;
+            Force previousNetForce = GetNetForceAndSource().Value;
+            forces[source] = force;
+            Force newNetForce = GetNetForceAndSource().Value;
+            return !newNetForce.Equals(previousNetForce);
         }
 
         public void RemoveAllForces()
         {
-            Force previousNetForce = GetNetForce();
-            couplingsToForces.Clear();
+            forces.Clear();
         }
 
         public override string ToString()

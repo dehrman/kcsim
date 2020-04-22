@@ -124,12 +124,12 @@ namespace KCSim.Parts.Mechanical.Machines
             couplingService.CreateNewLockedCoupling( // the control axle rotates the paddle wheel
                 input: Enable,
                 output: controlPaddleWheel);
-            couplingService.CreateNewLockedCoupling( // the paddle rotates the fulcrum axle
-                input: ArmPaddle,
-                output: arm.FulcrumAxle);
-            couplingService.CreateNewFreeFlowingCoupling( // the connector lowers and rises with the arm's end axle
-                input: arm.EndAxle,
-                output: connector);
+            //couplingService.CreateNewLockedCoupling( // the paddle rotates the fulcrum axle
+            //    input: ArmPaddle,
+            //    output: arm.FulcrumAxle);
+            //couplingService.CreateNewFreeFlowingCoupling( // the connector lowers and rises with the arm's end axle
+            //    input: arm.EndAxle,
+            //    output: connector);
 
             // The interaction between the paddle wheel and the paddle is at the core of the control mechanism and
             // requires special handling here, via a separate evaluator class.

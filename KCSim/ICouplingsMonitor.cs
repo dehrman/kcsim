@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using KCSim.Physics;
 using KCSim.Physics.Couplings;
 
 namespace KCSim
@@ -9,5 +10,6 @@ namespace KCSim
     {
         void RegisterCoupling(Coupling coupling);
         void RemoveCoupling(Coupling coupling);
+        void EvaluateForces();
     }
 }

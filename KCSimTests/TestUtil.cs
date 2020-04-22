@@ -9,15 +9,24 @@ namespace KCSimTests
 {
     public class TestUtil
     {
+        private ICouplingMonitor couplingMonitor = null;
         private ICouplingService couplingService = null;
 
+        public ICouplingMonitor GetSingletonCouplingMonitor()
+        {
+            if (couplingMonitor == null)
+            {
+                couplingMonitor = new CouplingMonitor(new PartsGraph());
+            }
+            return couplingMonitor;
+        }
+        
         public ICouplingService GetSingletonCouplingService()
         {
             if (couplingService == null)
             {
-                CouplingMonitor couplingMonitor = new CouplingMonitor(new PartsGraph());
                 CouplingFactory couplingFactory = new CouplingFactory();
-                couplingService = new CouplingService(couplingMonitor, couplingFactory);
+                couplingService = new CouplingService(GetSingletonCouplingMonitor(), couplingFactory);
             }
             return couplingService;
         }
@@ -42,7 +51,7 @@ namespace KCSimTests
         public Mock<IPaddleFactory> GetMockPaddleFactory(Mock<IMotionTimer> mockMotionTimer)
         {
             Mock<IPaddleFactory> mockPaddleFactory = new Mock<IPaddleFactory>();
-            Paddle paddle = new Paddle(mockMotionTimer.Object);
+            Paddle paddle = new Paddle(mockMotionTimer.Object, Paddle.Position.Positive, "test paddle");
             mockPaddleFactory.Setup(x => x.CreateNew(It.IsAny<Paddle.Position>(), It.IsAny<string>())).Returns(paddle);
             return mockPaddleFactory;
         }

@@ -47,10 +47,10 @@ namespace KCSim.Parts.Mechanical
             this.motionTimer = motionTimer;
         }
 
-        public override bool UpdateForce(Coupling coupling, Force force)
+        public override bool UpdateForce(Torqueable source, Force force)
         {
             Force oldForce = GetNetForce();
-            bool isForceDifferent = base.UpdateForce(coupling, force);
+            bool isForceDifferent = base.UpdateForce(source, force);
             
             // If there's no change in force, break early.
             if (!isForceDifferent)
@@ -59,7 +59,7 @@ namespace KCSim.Parts.Mechanical
             }
 
             // If the direction changed, reset the motion timer.
-            if (MotionMath.IsDifferentDirection(oldForce.Velocity, GetNetForce().Velocity))
+            if (!MotionMath.IsSameDirection(oldForce.Velocity, GetNetForce().Velocity))
             {
                 currentAngle = IntermediateRestingPlaceDegrees;
                 ReinitializeTimer();

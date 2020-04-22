@@ -9,104 +9,121 @@ namespace KCSim
     public class CouplingMonitor : ICouplingMonitor
     {
         private readonly IPartsGraph partsGraph;
+        private readonly Queue<EvaluationNode> evaluationQueue;
 
         public CouplingMonitor(IPartsGraph partsGraph)
         {
             this.partsGraph = partsGraph;
+            evaluationQueue = new Queue<EvaluationNode>();
         }
 
         public void RegisterCoupling(Coupling coupling)
         {
             partsGraph.AddVerticesAndEdge(coupling);
+            AddToEvaluationQueue(coupling);
         }
 
         public void RemoveCoupling(Coupling coupling)
         {
             partsGraph.RemoveEdge(coupling);
+            AddToEvaluationQueue(coupling);
         }
 
-        public void EvaluateForces(Torqueable root)
+        public void EvaluateForces()
         {
             // This method uses a breadth-first search to evaluate and propogate forces throughout
-            // the machine.
+            // the machine. In this algorithm, we represent a <vertex, edge> pair as a "node."
 
-            // First, determine whether or not the provided node has any couplings.
-            ISet<Coupling> rootCouplings = partsGraph.GetCouplings(root);
-            if (rootCouplings.Count == 0)
+            // Add leaf nodes first.
+            foreach (KeyValuePair<Torqueable, Coupling> leaf in partsGraph.GetLeafVertices())
             {
-                return;
-            }
-
-            // Create a set to keep track of visited couplings.
-            ISet<Coupling> visitedCouplings = new HashSet<Coupling>();
-
-            // Initialize the evaluation queue.
-            Queue<EvaluationNode> evaluationQueue = new Queue<EvaluationNode>();
-            Force rootForce = root.GetNetForce();
-            foreach (Coupling coupling in rootCouplings)
-            {
-                evaluationQueue.Enqueue(new EvaluationNode(root, rootForce, coupling));
+                AddToEvaluationQueue(new EvaluationNode(leaf.Key, leaf.Value));
             }
 
             while (evaluationQueue.Count > 0)
             {
                 // Get the next coupling to evaluate.
-                EvaluationNode evaluationNode = evaluationQueue.Dequeue();
-                Coupling currentCoupling = evaluationNode.Coupling;
+                EvaluationNode currentNode = evaluationQueue.Dequeue();
                 
-                // Visit the current node. If targetOfForce is non-null, that indicates that the force resulting
-                // from the evaluation should be propogated to any further couplings emanating from targetOfForce.
-                Torqueable targetOfForce = UpdateForce(evaluationNode);
-                
-                // Mark the coupling as visited.
-                visitedCouplings.Add(currentCoupling);
-                
-                if (targetOfForce != null)
+                // Visit the current node.
+                VisitNode(currentNode);
+            }
+        }
+
+        private void VisitNode(EvaluationNode evaluationNode)
+        {
+            Coupling coupling = evaluationNode.Coupling;
+            Torqueable source = evaluationNode.SourceOfForce;
+            Torqueable target = coupling.GetOther(source);
+
+            // If the net force is coming from the target itself, no need to back-propagate the force;
+            // just break early.
+            KeyValuePair<Torqueable, Force> sourceNetForce = source.GetNetForceAndSource();
+            if (sourceNetForce.Key == target)
+            {
+                return;
+            }
+
+            // Apply the force to the coupling.
+            Force targetForce = coupling.ReceiveForce(source, sourceNetForce.Value);
+
+            // Apply the force to the target.
+            bool didTargetNetForceChange = target.UpdateForce(source, targetForce);
+
+            // If the net force on the target did not change, no need to back-propagate the force;
+            // just break early.
+            if (!didTargetNetForceChange)
+            {
+                return;
+            }
+            
+            // Get adjacent couplings, and add them to the queue.
+            foreach (var adjacentCoupling in partsGraph.GetCouplings(target))
+            {
+                if (adjacentCoupling != coupling)
                 {
-                    // If we have a non-null targetOfForce, that means that the target has received
-                    // an updated force, and so we need to propogate that to further couplings.
-                    Force force = targetOfForce.GetNetForce();
-                    ISet<Coupling> couplingsToEvaluate = partsGraph.GetCouplings(targetOfForce);
-                    foreach (Coupling couplingToEvaluate in couplingsToEvaluate)
-                    {
-                        if (!visitedCouplings.Contains(couplingToEvaluate))
-                        {
-                            evaluationQueue.Enqueue(new EvaluationNode(targetOfForce, force, couplingToEvaluate));
-                        }
-                    }
+                    AddToEvaluationQueue(adjacentCoupling);
                 }
             }
         }
 
-        private Torqueable UpdateForce(EvaluationNode evaluationNode)
+        private void AddToEvaluationQueue(Coupling coupling)
         {
-            Coupling coupling = evaluationNode.Coupling;
-            Torqueable sourceOfForce = evaluationNode.SourceOfForce;
-            Force resultingForceOnTarget = coupling.ReceiveForce(sourceOfForce, evaluationNode.Force);
-            Torqueable targetOfForce = coupling.Input == sourceOfForce ? coupling.Output : coupling.Input;
-            if (targetOfForce.UpdateForce(coupling, resultingForceOnTarget))
-            {
-                // The net force on the target changed, so return it.
-                return targetOfForce;
-            }
-            else
-            {
-                // No change in net force on the target, so this is the end of the line.
-                return null;
-            }
+            AddToEvaluationQueue(new EvaluationNode(coupling.Input, coupling));
+            AddToEvaluationQueue(new EvaluationNode(coupling.Output, coupling));
+        }
+
+        private void AddToEvaluationQueue(EvaluationNode evaluationNode)
+        {
+            evaluationQueue.Enqueue(evaluationNode);
         }
 
         private class EvaluationNode
         {
             public Torqueable SourceOfForce;
-            public Force Force;
             public Coupling Coupling;
 
-            public EvaluationNode(Torqueable sourceOfForce, Force force, Coupling coupling)
+            public EvaluationNode(Torqueable sourceOfForce, Coupling coupling)
             {
                 this.SourceOfForce = sourceOfForce;
-                this.Force = force;
                 this.Coupling = coupling;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is EvaluationNode node &&
+                       EqualityComparer<Torqueable>.Default.Equals(SourceOfForce, node.SourceOfForce) &&
+                       EqualityComparer<Coupling>.Default.Equals(Coupling, node.Coupling);
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(SourceOfForce, Coupling);
+            }
+
+            public override string ToString()
+            {
+                return "EvaluationNode: " + SourceOfForce + "; " + Coupling;
             }
         }
     }

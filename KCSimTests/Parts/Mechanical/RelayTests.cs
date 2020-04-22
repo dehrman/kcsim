@@ -14,113 +14,89 @@ namespace KCSimTests
      */
     public class RelayTests
     {
-        private TestUtil testUtil = new TestUtil();
+        private readonly TestUtil testUtil = new TestUtil();
+        private readonly ICouplingMonitor couplingMonitor;
+        private readonly ICouplingService couplingService;
 
-        private readonly Coupling enableCoupling;
-        private readonly Coupling inputCoupling;
+        private readonly ExternalSwitch enable = new ExternalSwitch(name: "enable switch");
+        private readonly ExternalSwitch input = new ExternalSwitch(name: "input switch");
         private Relay relay;
 
         public RelayTests()
         {
-            ICouplingService couplingService = testUtil.GetSingletonCouplingService();
+            couplingMonitor = testUtil.GetSingletonCouplingMonitor();
+            couplingService = testUtil.GetSingletonCouplingService();
             relay = new Relay(
                 couplingService: couplingService,
                 paddleFactory: testUtil.GetMockPaddleFactory().Object,
                 enableDirection: Direction.Positive,
-                inputDirection: Direction.Positive);
+                inputDirection: Direction.Positive,
+                name: "relay");
 
-            var enable = new HumanSwitch();
-            var input = new HumanSwitch();
-            enableCoupling = couplingService.CreateNewLockedCoupling(enable, relay.Enable);
-            inputCoupling = couplingService.CreateNewLockedCoupling(input, relay.InputAxle);
+            couplingService.CreateNewLockedCoupling(enable, relay.Enable);
+            couplingService.CreateNewLockedCoupling(input, relay.InputAxle);
         }
 
         [Fact]
         public void TestThat_WhenNoForceIsOnControl_OutputStaysZero()
         {
-            Axle inputAxle = relay.InputAxle;
-            Axle outputAxle = relay.OutputAxle;
-
-            inputAxle.UpdateForce(inputCoupling, new Force(1));
-            Assert.Equal(Force.ZeroForce, outputAxle.GetNetForce());
+            enable.Force = Force.ZeroForce;
+            input.Force = new Force(1);
+            couplingMonitor.EvaluateForces();
+            Assert.Equal(Force.ZeroForce, relay.OutputAxle.GetNetForce());
         }
 
         [Fact]
         public void TestThat_WhenPositiveControl_OutputIsPowered()
         {
-            Axle inputAxle = relay.InputAxle;
-            Axle outputAxle = relay.OutputAxle;
-            Axle controlAxle = relay.Enable;
-
-            inputAxle.UpdateForce(inputCoupling, new Force(1));
-            controlAxle.UpdateForce(enableCoupling, new Force(1));
-
-            Assert.Equal(new Force(1), outputAxle.GetNetForce());
+            enable.Force = new Force(1);
+            input.Force = new Force(1);
+            couplingMonitor.EvaluateForces();
+            Assert.Equal(new Force(1), relay.OutputAxle.GetNetForce());
         }
 
         [Fact]
         public void TestThat_WhenNegativeControl_OutputIsNotPowered()
         {
-            Axle inputAxle = relay.InputAxle;
-            Axle outputAxle = relay.OutputAxle;
-            Axle controlAxle = relay.Enable;
-
-            inputAxle.UpdateForce(inputCoupling, new Force(1));
-            controlAxle.UpdateForce(enableCoupling, new Force(-1));
-
-            Assert.Equal(Force.ZeroForce, outputAxle.GetNetForce());
+            enable.Force = new Force(-1);
+            input.Force = new Force(1);
+            couplingMonitor.EvaluateForces();
+            Assert.Equal(Force.ZeroForce, relay.OutputAxle.GetNetForce());
         }
 
         [Fact]
         public void TestThat_WhenRelayIsEngaged_ButNegativeInputIsProvided_OutputIsNotPowered()
         {
-            Axle inputAxle = relay.InputAxle;
-            Axle outputAxle = relay.OutputAxle;
-            Axle controlAxle = relay.Enable;
-
-            inputAxle.UpdateForce(inputCoupling, new Force(-1));
-            controlAxle.UpdateForce(enableCoupling, new Force(1));
-
-            Assert.Equal(Force.ZeroForce, outputAxle.GetNetForce());
+            enable.Force = new Force(1);
+            input.Force = new Force(-1);
+            couplingMonitor.EvaluateForces();
+            Assert.Equal(Force.ZeroForce, relay.OutputAxle.GetNetForce());
         }
 
         [Fact]
         public void TestThat_RelayStaysEngagedWhenControlForceIsRemoved()
         {
-            Axle inputAxle = relay.InputAxle;
-            Axle outputAxle = relay.OutputAxle;
-            Axle controlAxle = relay.Enable;
+            enable.Force = new Force(1);
+            input.Force = new Force(1);
+            couplingMonitor.EvaluateForces();
 
-            inputAxle.UpdateForce(inputCoupling, new Force(1));
-            
-            // Start with the relay engaged.
-            controlAxle.UpdateForce(enableCoupling, new Force(1));
-            Assert.Equal(new Force(1), outputAxle.GetNetForce());
+            enable.Force = Force.ZeroForce;
+            couplingMonitor.EvaluateForces();
 
-            // Now remove the control force.
-            controlAxle.RemoveAllForces();
-
-            Assert.Equal(new Force(1), outputAxle.GetNetForce());
+            Assert.Equal(new Force(1), relay.OutputAxle.GetNetForce());
         }
 
         [Fact]
-        public void TestThat_RelayDisengagesWhenControlForceIsReversed()
+        public void TestThat_RelayStaysEngagedWhenControlForceIsReversed()
         {
-            Axle inputAxle = relay.InputAxle;
-            Axle outputAxle = relay.OutputAxle;
-            Axle controlAxle = relay.Enable;
+            enable.Force = new Force(1);
+            input.Force = new Force(1);
+            couplingMonitor.EvaluateForces();
 
-            inputAxle.UpdateForce(inputCoupling, new Force(1));
+            enable.Force = new Force(-1);
+            couplingMonitor.EvaluateForces();
 
-            // Start with the relay engaged.
-            controlAxle.UpdateForce(enableCoupling, new Force(1));
-            Assert.Equal(new Force(1), outputAxle.GetNetForce());
-
-            // Now disengage the relay.
-            controlAxle.RemoveAllForces();
-            controlAxle.UpdateForce(enableCoupling, new Force(-1));
-
-            Assert.Equal(Force.ZeroForce, outputAxle.GetNetForce());
+            Assert.Equal(new Force(1), relay.OutputAxle.GetNetForce());
         }
     }
 }

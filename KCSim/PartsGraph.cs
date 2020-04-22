@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using KCSim.Physics;
 using KCSim.Physics.Couplings;
@@ -31,16 +32,23 @@ namespace KCSim
             graph[coupling.Output].Add(coupling);
         }
 
+        public void RemoveEdge(Coupling coupling)
+        {
+            graph[coupling.Input].Remove(coupling);
+            graph[coupling.Output].Remove(coupling);
+        }
+
         public ISet<Coupling> GetCouplings(Torqueable node)
         {
             ISet<Coupling> couplings = graph.GetValueOrDefault(node, ImmutableHashSet<Coupling>.Empty);
             return new HashSet<Coupling>(couplings);
         }
 
-        public void RemoveEdge(Coupling coupling)
+        public IEnumerable<KeyValuePair<Torqueable, Coupling>> GetLeafVertices()
         {
-            graph[coupling.Input].Remove(coupling);
-            graph[coupling.Output].Remove(coupling);
+            return graph
+                .Where(kvp => kvp.Value.Count == 1)
+                .Select(kvp => new KeyValuePair<Torqueable, Coupling>(kvp.Key, kvp.Value.ElementAt(0)));
         }
     }
 }

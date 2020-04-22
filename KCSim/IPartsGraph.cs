@@ -9,8 +9,11 @@ namespace KCSim
     public interface IPartsGraph
     {
         void AddVerticesAndEdge(Coupling coupling);
+        
         void RemoveEdge(Coupling coupling);
 
         ISet<Coupling> GetCouplings(Torqueable node);
+
+        IEnumerable<KeyValuePair<Torqueable, Coupling>> GetLeafVertices();
     }
 }

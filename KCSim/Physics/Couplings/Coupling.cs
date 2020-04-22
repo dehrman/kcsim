@@ -22,6 +22,18 @@ namespace KCSim.Physics.Couplings
             this.name = name;
         }
 
+        public Torqueable GetOther(Torqueable torqueable)
+        {
+            if (torqueable == Input)
+            {
+                return Output;
+            }
+            else
+            {
+                return Input;
+            }
+        }
+
         /**
          * Receive a force on this coupling, for the given torqueable, and return a force to be applied
          * to the next node(s) in the structure.
@@ -51,7 +63,7 @@ namespace KCSim.Physics.Couplings
 
         public override string ToString()
         {
-            return "coupling between " + Input + " and " + Output;
+            return "coupling from " + Input + " to " + Output;
         }
 
         public override bool Equals(object obj)
