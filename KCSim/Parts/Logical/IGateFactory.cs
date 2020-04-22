@@ -6,6 +6,14 @@ namespace KCSim.Parts.Logical
 {
     public interface IGateFactory
     {
-        public AndGate CreateNewAndGate();
+        AndGate CreateNewAndGate();
+
+        OrGate CreateNewOrGate();
+
+        NotGate CreateNewNotGate();
+
+        NandGate CreateNewNandGate();
+
+        XorGate CreateNewXorGate();
     }
 }

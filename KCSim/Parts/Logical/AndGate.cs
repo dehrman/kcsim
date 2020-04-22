@@ -5,7 +5,7 @@ namespace KCSim.Parts.Logical
 {
     public class AndGate : BinaryGate
     {
-        public readonly Axle Power = new Axle("AND gate power");
+        public readonly Axle Power = new Axle("OR gate power");
         public readonly Axle InputA = new Axle("AND gate inputA");
         public readonly Axle InputB = new Axle("AND gate inputB");
         public readonly Axle Output = new Axle("AND gate output");
@@ -45,7 +45,7 @@ namespace KCSim.Parts.Logical
             couplingService.CreateNewLockedCoupling(
                 inputLatchB.OutputAxleNegative,
                 Output,
-                "coupling from inputLatchB's negative output to the And gate's output");
+                "coupling from inputLatchB's negative output to the AND gate's output");
             couplingService.CreateNewLockedCoupling(
                 inputLatchB.OutputAxlePositive,
                 Output,
