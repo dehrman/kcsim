@@ -46,7 +46,7 @@ namespace KCSim.Parts.Mechanical.Machines
             // as the inverse of that of the control axle.
             paddleWheelEnableDirection = enableDirection.Opposite();
 
-            InputAxle = new Axle(name + "; input axle");
+            InputAxle = new Axle(name: name + "; input axle");
             InputGear = new SmallGear(name + "; input gear");
             connector = new SmallGear(name + "; connector gear");
             OutputGear = new SmallGear(name + "; output gear");

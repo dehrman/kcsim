@@ -10,6 +10,7 @@ namespace KCSim
     {
         void RegisterCoupling(Coupling coupling);
         void RemoveCoupling(Coupling coupling);
+        bool IsCoupled(Torqueable torqueable);
         void EvaluateForces();
     }
 }

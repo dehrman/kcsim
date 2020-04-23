@@ -29,6 +29,12 @@ namespace KCSim
             AddToEvaluationQueue(coupling);
         }
 
+        public bool IsCoupled(Torqueable torqueable)
+        {
+            var couplings = partsGraph.GetCouplings(torqueable);
+            return couplings != null && couplings.Count > 0;
+        }
+
         public void EvaluateForces()
         {
             // This method uses a breadth-first search to evaluate and propogate forces throughout

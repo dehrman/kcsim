@@ -1,4 +1,5 @@
-﻿using KCSim;
+﻿using System;
+using KCSim;
 using KCSim.Parts.Logical;
 using KCSim.Parts.Mechanical;
 using KCSim.Parts.Mechanical.Machines;
@@ -6,13 +7,16 @@ using KCSim.Parts.State;
 using KCSim.Physics;
 using KCSim.Physics.Couplings;
 using Moq;
+using Xunit;
 
 namespace KCSimTests
 {
     public class TestUtil
     {
-        private ICouplingMonitor couplingMonitor = null;
         private ICouplingService couplingService = null;
+        private ICouplingMonitor couplingMonitor = null;
+        private IGateMonitor gateMonitor = null;
+        private IStateMonitor stateMonitor = null;
 
         public ICouplingMonitor GetSingletonCouplingMonitor()
         {
@@ -77,19 +81,69 @@ namespace KCSimTests
             return mockBidirectionalLatchFactory;
         }
 
-        public IGateMonitor GetGateMonitor()
+        public IGateMonitor GetSingletonGateMonitor()
         {
-            return new GateMonitor();
+            if (gateMonitor == null)
+            {
+                gateMonitor = new GateMonitor();
+            }
+            return gateMonitor;
+        }
+
+        public IStateMonitor GetSingletonStateMonitor()
+        {
+            if (stateMonitor == null)
+            {
+                stateMonitor = new StateMonitor(GetSingletonCouplingMonitor());
+            }
+            return stateMonitor;
         }
 
         public IGateFactory GetGateFactory()
         {
-            return new GateFactory(GetSingletonCouplingService(), GetMockBidirectionalLatchFactory().Object, GetGateMonitor());
+            return new GateFactory(
+                couplingService: GetSingletonCouplingService(),
+                bidirectionalLatchFactory: GetMockBidirectionalLatchFactory().Object,
+                gateMonitor: GetSingletonGateMonitor());
         }
 
         public IStateFactory GetStateFactory()
         {
-            return new StateFactory(GetSingletonCouplingService(), GetGateFactory());
+            return new StateFactory(
+                couplingService: GetSingletonCouplingService(),
+                gateFactory: GetGateFactory(),
+                stateMonitor: GetSingletonStateMonitor());
+        }
+
+        /**
+         * Return a new version of this force in the same direction but at the desired level.
+         * 
+         * Should only be used for testing purposes.
+         */
+        public static Force ToLevel(Force forceToChange, Force forceWithDesiredLevel)
+        {
+            if (forceToChange.Equals(Force.ZeroForce))
+            {
+                return Force.ZeroForce;
+            }
+            double sign = forceToChange.Velocity / Math.Abs(forceToChange.Velocity);
+            return new Force(Math.Abs(forceWithDesiredLevel.Velocity) * sign);
+        }
+
+        /**
+         * Return a new version of this force in the same direction but at the desired level.
+         * 
+         * Should only be used for testing purposes.
+         */
+        public static Force ToLevel(double forceToChange, double desiredLevel)
+        {
+            return ToLevel(new Force(forceToChange), new Force(desiredLevel));
+        }
+
+        public static void AssertDirectionsEqual(Force force1, Force force2)
+        {
+            var releveledForce1 = ToLevel(force1, force2);
+            Assert.Equal(releveledForce1, force2);
         }
     }
 }

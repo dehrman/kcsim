@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using KCSim;
-using KCSim.Parts.Mechanical.Atomic;
+﻿using KCSim;
 using KCSim.Parts.Mechanical.Machines;
 using KCSim.Parts.State;
 using KCSim.Physics;
@@ -35,17 +31,16 @@ namespace KCSimTests.Parts.State
         }
 
         [Theory]
-        [InlineData(-1, -1, 1)]
         [InlineData(-1, 1, 1)]
-        [InlineData(1, -1, -1)]
+        [InlineData(1, -2, -2)]
         public void TestThat_TruthTableHolds(int setInverse, int resetInverse, int expectedOutput)
         {
             SetInverse.Force = new Force(setInverse);
             ResetInverse.Force = new Force(resetInverse);
             couplingMonitor.EvaluateForces();
 
-            Assert.Equal(new Force(expectedOutput), latch.DataOut.GetNetForce());
-            Assert.Equal(new Force(expectedOutput * -1), latch.DataOutInverse.GetNetForce());
+            TestUtil.AssertDirectionsEqual(new Force(expectedOutput), latch.Output.GetNetForce());
+            TestUtil.AssertDirectionsEqual(new Force(expectedOutput * -1), latch.OutputInverse.GetNetForce());
         }
 
         [Fact]
@@ -57,8 +52,8 @@ namespace KCSimTests.Parts.State
             SetInverse.Force = new Force(1);
             couplingMonitor.EvaluateForces();
 
-            Assert.Equal(new Force(1), latch.DataOut.GetNetForce());
-            Assert.Equal(new Force(-1), latch.DataOutInverse.GetNetForce());
+            TestUtil.AssertDirectionsEqual(new Force(1), latch.Output.GetNetForce());
+            TestUtil.AssertDirectionsEqual(new Force(-1), latch.OutputInverse.GetNetForce());
         }
     }
 }

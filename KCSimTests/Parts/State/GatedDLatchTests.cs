@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using KCSim;
-using KCSim.Parts.Mechanical.Atomic;
+﻿using KCSim;
 using KCSim.Parts.Mechanical.Machines;
 using KCSim.Parts.State;
 using KCSim.Physics;
@@ -30,8 +26,8 @@ namespace KCSimTests.Parts.State
             latch = testUtil.GetStateFactory().CreateNewGatedDLatch();
 
             couplingService.CreateNewLockedCoupling(Power, latch.Power);
-            couplingService.CreateNewLockedCoupling(DataIn, latch.DataIn);
-            couplingService.CreateNewLockedCoupling(WriteEnable, latch.WriteEnable);
+            couplingService.CreateNewLockedCoupling(DataIn, latch.Data);
+            couplingService.CreateNewLockedCoupling(WriteEnable, latch.Enable);
         }
 
         [Theory]
@@ -44,8 +40,10 @@ namespace KCSimTests.Parts.State
 
             couplingMonitor.EvaluateForces();
 
-            Assert.Equal(new Force(valueToLatch), latch.DataOut.GetNetForce());
-            Assert.Equal(new Force(valueToLatch * -1), latch.DataOutInverse.GetNetForce());
+            var latchedValue = latch.Output.GetNetForce().Velocity;
+            Assert.Equal(new Force(valueToLatch), new Force(latchedValue));
+            Assert.Equal(valueToLatch, latchedValue);
+            Assert.Equal(new Force(valueToLatch * -1), latch.OutputInverse.GetNetForce());
         }
 
         [Theory]
@@ -65,8 +63,8 @@ namespace KCSimTests.Parts.State
             couplingMonitor.EvaluateForces();
 
             // We should expect to still see the initially latched-in value on the output wire.
-            Assert.Equal(new Force(initialValue), latch.DataOut.GetNetForce());
-            Assert.Equal(new Force(initialValue * -1), latch.DataOutInverse.GetNetForce());
+            Assert.Equal(new Force(initialValue), latch.Output.GetNetForce());
+            Assert.Equal(new Force(initialValue * -1), latch.OutputInverse.GetNetForce());
         }
     }
 }

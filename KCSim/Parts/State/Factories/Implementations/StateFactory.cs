@@ -6,22 +6,27 @@ namespace KCSim.Parts.State
     {
         private readonly ICouplingService couplingService;
         private readonly IGateFactory gateFactory;
+        private readonly IStateMonitor stateMonitor;
 
-        public StateFactory(ICouplingService couplingService, IGateFactory gateFactory)
+        public StateFactory(
+            ICouplingService couplingService,
+            IGateFactory gateFactory,
+            IStateMonitor stateMonitor)
         {
             this.couplingService = couplingService;
             this.gateFactory = gateFactory;
+            this.stateMonitor = stateMonitor;
         }
 
 
         public SRLatch CreateNewSRLatch()
         {
-            return new SRLatch(couplingService, gateFactory);
+            return stateMonitor.RegisterStatefulGate(new SRLatch(couplingService, gateFactory));
         }
 
         public GatedDLatch CreateNewGatedDLatch()
         {
-            return new GatedDLatch(couplingService, gateFactory);
+            return stateMonitor.RegisterStatefulGate(new GatedDLatch(couplingService, gateFactory));
         }
     }
 }

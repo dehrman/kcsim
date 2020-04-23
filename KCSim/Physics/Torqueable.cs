@@ -1,16 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using KCSim.Physics.Couplings;
 
 namespace KCSim.Physics
 {
     public class Torqueable
     {
+        public delegate void OnForceChangeDelegate(Force oldForce, Force newForce);
+        private readonly ISet<OnForceChangeDelegate> onForceChangeDelegates = new HashSet<OnForceChangeDelegate>();
+        public event OnForceChangeDelegate OnForceChange
+        {
+            add { onForceChangeDelegates.Add(value); }
+            remove { onForceChangeDelegates.Remove(value); }
+        }
+
         private readonly Dictionary<Torqueable, Force> forces;
         private readonly string name;
 
-        public Torqueable(string name="")
+        public Torqueable(string name = "")
         {
             this.forces = new Dictionary<Torqueable, Force>();
             this.name = name;
@@ -35,7 +41,22 @@ namespace KCSim.Physics
             Force previousNetForce = GetNetForceAndSource().Value;
             forces[source] = force;
             Force newNetForce = GetNetForceAndSource().Value;
-            return !newNetForce.Equals(previousNetForce);
+
+            if (newNetForce.Equals(previousNetForce))
+            {
+                return false;
+            }
+
+            // The net force has changed, so invoke the callback if one is available.
+            // We must create a copy of the delegates before iterating through them in the event that the set is
+            // modified from outside this class during the iteration.
+            ISet<OnForceChangeDelegate> copyOfDelegates =
+                new HashSet<OnForceChangeDelegate>(onForceChangeDelegates);
+            foreach (OnForceChangeDelegate handler in copyOfDelegates)
+            {
+                handler(previousNetForce, newNetForce);
+            }
+            return true;
         }
 
         public void RemoveAllForces()

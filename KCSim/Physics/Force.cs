@@ -17,7 +17,7 @@ namespace KCSim.Physics
             Velocity = velocity;
         }
 
-        public int CompareTo(object obj)
+        public virtual int CompareTo(object obj)
         {
             if (obj == null) return 1;
 
@@ -26,6 +26,18 @@ namespace KCSim.Physics
             if (other == null)
             {
                 throw new ArgumentException("Object is not a Force");
+            }
+
+            if (this.Equals(other))
+            {
+                return 0;
+            }
+
+            // If the velocities are the same absolute value, break the tie by falling back and default
+            // sorting.
+            if (Math.Abs(this.Velocity) == Math.Abs(other.Velocity))
+            {
+                return this.Velocity.CompareTo(other.Velocity);
             }
 
             return Math.Abs(this.Velocity).CompareTo(Math.Abs(other.Velocity));

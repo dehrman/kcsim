@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using KCSim.Parts.Logical;
+﻿using KCSim.Parts.Logical;
 using KCSim.Physics;
-using static KCSim.Parts.Mechanical.Atomic.Axle;
+using static KCSim.Physics.Torqueable;
 
 namespace KCSim
 {
@@ -11,11 +8,11 @@ namespace KCSim
     {
         public T RegisterGate<T>(T gate) where T : Gate
         {
-            gate.InputA.OnForceChange = GetOnForceChangeDelegate(gate, gate.InputA);
-            gate.InputB.OnForceChange = GetOnForceChangeDelegate(gate, gate.InputB);
-            gate.Power.OnForceChange = GetOnForceChangeDelegate(gate, gate.Power);
-            gate.Output.OnForceChange = GetOnForceChangeDelegate(gate, gate.Output);
-            gate.OutputInverse.OnForceChange = GetOnForceChangeDelegate(gate, gate.OutputInverse);
+            gate.InputA.OnForceChange += GetOnForceChangeDelegate(gate, gate.InputA);
+            gate.InputB.OnForceChange += GetOnForceChangeDelegate(gate, gate.InputB);
+            gate.Power.OnForceChange += GetOnForceChangeDelegate(gate, gate.Power);
+            gate.Output.OnForceChange += GetOnForceChangeDelegate(gate, gate.Output);
+            gate.OutputInverse.OnForceChange += GetOnForceChangeDelegate(gate, gate.OutputInverse);
 
             return gate;
         }

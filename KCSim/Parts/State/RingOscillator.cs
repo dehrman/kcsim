@@ -15,11 +15,6 @@ namespace KCSim.Parts.State
 
         private readonly ISet<OnQChangedDelegate> onQChangedDelegateSet = new HashSet<OnQChangedDelegate>();
 
-        // Establish an initial state. Note that the magnitude of this force need not necessarily match the
-        // magnitude of the stable output force, as in the stable state, Q will be either a positive or
-        // negative version of the provided power.
-        private static readonly Force InitialState = new Force(1);
-
         public RingOscillator(
             ICouplingService couplingService,
             IGateFactory gateFactory,
@@ -58,7 +53,7 @@ namespace KCSim.Parts.State
             couplingService.CreateNewLockedCoupling(Q, qListener);
 
             // Finally, set the oscillator's first gate to a known initial state.
-            couplingService.CreateNewInitialStateCoupling(InitialState, buffers[0].Input);
+            couplingService.CreateNewInitialStateCoupling(new InitialState(), buffers[0].Input);
         }
 
         public ISet<OnQChangedDelegate> GetOnQChangedDelegateSet()
