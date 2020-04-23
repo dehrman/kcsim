@@ -5,11 +5,6 @@ namespace KCSim.Parts.Logical
 {
     public class OrGate : Gate
     {
-        public readonly Axle Power = new Axle("OR gate power");
-        public readonly Axle InputA = new Axle("OR gate inputA");
-        public readonly Axle InputB = new Axle("OR gate inputB");
-        public readonly Axle Output = new Axle("OR gate output");
-
         public OrGate(
             ICouplingService couplingService,
             AndGate andGate,

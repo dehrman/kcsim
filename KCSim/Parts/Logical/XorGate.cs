@@ -5,11 +5,6 @@ namespace KCSim.Parts.Logical
 {
     public class XorGate : Gate
     {
-        public readonly Axle Power = new Axle("XOR gate power");
-        public readonly Axle InputA = new Axle("XOR gate inputA");
-        public readonly Axle InputB = new Axle("XOR gate inputB");
-        public readonly Axle Output = new Axle("XOR gate output");
-
         public XorGate(
             ICouplingService couplingService,
             NandGate nandGate,

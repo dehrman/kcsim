@@ -17,5 +17,7 @@ namespace KCSim
         Coupling CreateNewBidirectionalOpposingCoupling(Torqueable input, Torqueable output, string name = "");
 
         Coupling CreateNewFreeFlowingCoupling(Torqueable input, Torqueable output, string name = "");
+
+        Coupling CreateNewInitialStateCoupling(Force initialForce, Torqueable output, string name = "");
     }
 }

@@ -8,7 +8,7 @@ namespace KCSim.Physics
      */
     public class Force : IComparable
     {
-        public static Force ZeroForce = new Force(0);
+        public static readonly Force ZeroForce = new Force(0);
 
         public double Velocity { get; }
 

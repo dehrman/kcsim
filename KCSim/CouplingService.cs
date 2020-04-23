@@ -59,5 +59,12 @@ namespace KCSim
             couplingMonitor.RegisterCoupling(coupling);
             return coupling;
         }
+
+        public Coupling CreateNewInitialStateCoupling(Force initialForce, Torqueable output, string name = "")
+        {
+            Coupling coupling = couplingFactory.CreateNewInitialStateCoupling(initialForce, output, name);
+            couplingMonitor.RegisterCoupling(coupling);
+            return coupling;
+        }
     }
 }

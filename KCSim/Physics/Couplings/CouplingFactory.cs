@@ -22,6 +22,11 @@ namespace KCSim.Physics.Couplings
             return new BidirectionalOpposingCoupling(input, output, GetInputToOutputRatio(input, output), name);
         }
 
+        public Coupling CreateNewInitialStateCoupling(Force initialForce, Torqueable output, string name = "")
+        {
+            return new InitialStateCoupling(initialForce, output, name);
+        }
+
         public Coupling CreateNewLockedCoupling(Torqueable input, Torqueable output, string name = "")
         {
             return new BidirectionalSymmetricalCoupling(input, output, name);

@@ -20,7 +20,7 @@ namespace KCSimTests.Parts.Logical
             couplingMonitor = testUtil.GetSingletonCouplingMonitor();
             couplingService = testUtil.GetSingletonCouplingService();
 
-            var gateFactory = new GateFactory(couplingService, testUtil.GetMockBidirectionalLatchFactory().Object);
+            var gateFactory = testUtil.GetGateFactory();
             notGate = gateFactory.CreateNewNotGate();
 
             couplingService.CreateNewLockedCoupling(inputSwitch, notGate.Input);

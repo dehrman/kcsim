@@ -11,10 +11,6 @@ namespace KCSim.Parts.Logical
      */
     public class Buffer : Gate
     {
-        public readonly Axle Power = new Axle("buffer power");
-        public readonly Axle Input = new Axle("buffer input");
-        public readonly Axle Output = new Axle("buffer output");
-
         public Buffer(
             ICouplingService couplingService,
             IBidirectionalLatchFactory bidirectionalLatchFactory) : base("buffer")

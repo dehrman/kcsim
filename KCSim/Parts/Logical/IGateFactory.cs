@@ -6,18 +6,18 @@ namespace KCSim.Parts.Logical
 {
     public interface IGateFactory
     {
-        AndGate CreateNewAndGate();
+        AndGate CreateNewAndGate(bool doMonitor = true);
 
-        OrGate CreateNewOrGate();
+        OrGate CreateNewOrGate(bool doMonitor = true);
 
-        NotGate CreateNewNotGate();
+        NotGate CreateNewNotGate(bool doMonitor = true);
 
-        NandGate CreateNewNandGate();
+        NandGate CreateNewNandGate(bool doMonitor = true, string name = "");
 
-        XorGate CreateNewXorGate();
+        XorGate CreateNewXorGate(bool doMonitor = true);
 
-        NorGate CreateNewNorGate();
+        NorGate CreateNewNorGate(bool doMonitor = true);
 
-        Buffer CreateNewBuffer();
+        Buffer CreateNewBuffer(bool doMonitor = true);
     }
 }

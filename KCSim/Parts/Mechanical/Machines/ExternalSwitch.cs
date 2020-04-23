@@ -13,6 +13,13 @@ namespace KCSim.Parts.Mechanical.Machines
         {
         }
 
+        public ExternalSwitch(
+            Force initialForce,
+            string name = "") : base(name)
+        {
+            this.force = initialForce;
+        }
+
         public override KeyValuePair<Torqueable, Force> GetNetForceAndSource()
         {
             if (force == null)

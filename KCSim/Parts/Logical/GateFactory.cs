@@ -14,74 +14,112 @@ namespace KCSim.Parts.Logical
     {
         private readonly ICouplingService couplingService;
         private readonly IBidirectionalLatchFactory bidirectionalLatchFactory;
+        private readonly IGateMonitor gateMonitor;
 
         public GateFactory(
             ICouplingService couplingService,
-            IBidirectionalLatchFactory bidirectionalLatchFactory)
+            IBidirectionalLatchFactory bidirectionalLatchFactory,
+            IGateMonitor gateMonitor)
         {
             this.couplingService = couplingService;
             this.bidirectionalLatchFactory = bidirectionalLatchFactory;
+            this.gateMonitor = gateMonitor;
         }
 
         /**
          * Trivial construction—no standard module required
          */
-        public NotGate CreateNewNotGate()
+        public NotGate CreateNewNotGate(bool doMonitor = true)
         {
-            return new NotGate(couplingService);
+            var gate = new NotGate(couplingService);
+            if (doMonitor)
+            {
+                gateMonitor.RegisterGate(gate);
+            }
+            return gate;
         }
 
         /**
          * Requires one standard module
          */
-        public AndGate CreateNewAndGate()
+        public AndGate CreateNewAndGate(bool doMonitor = true)
         {
-            return new AndGate(couplingService, bidirectionalLatchFactory);
+            var gate = new AndGate(couplingService, bidirectionalLatchFactory);
+            if (doMonitor)
+            {
+                gateMonitor.RegisterGate(gate);
+            }
+            return gate;
         }
 
         /**
          * Requires one standard module
          */
-        public OrGate CreateNewOrGate()
+        public OrGate CreateNewOrGate(bool doMonitor = true)
         {
-            var andGate = CreateNewAndGate();
-            var notGateInputA = CreateNewNotGate();
-            var notGateInputB = CreateNewNotGate();
-            var notGateOutput = CreateNewNotGate();
-            return new OrGate(couplingService, andGate, notGateInputA, notGateInputB, notGateOutput);
+            var andGate = CreateNewAndGate(doMonitor: false);
+            var notGateInputA = CreateNewNotGate(doMonitor: false);
+            var notGateInputB = CreateNewNotGate(doMonitor: false);
+            var notGateOutput = CreateNewNotGate(doMonitor: false);
+            var gate = new OrGate(couplingService, andGate, notGateInputA, notGateInputB, notGateOutput);
+            if (doMonitor)
+            {
+                gateMonitor.RegisterGate(gate);
+            }
+            return gate;
         }
 
         /**
          * Requires one standard module
          */
-        public NandGate CreateNewNandGate()
+        public NandGate CreateNewNandGate(bool doMonitor = true, string name = "NAND gate")
         {
-            var andGate = CreateNewAndGate();
-            var notGate = CreateNewNotGate();
-            return new NandGate(couplingService, andGate, notGate);
+            var andGate = CreateNewAndGate(doMonitor: false);
+            var notGate = CreateNewNotGate(doMonitor: false);
+            var gate = new NandGate(couplingService, andGate, notGate, name);
+            if (doMonitor)
+            {
+                gateMonitor.RegisterGate(gate);
+            }
+            return gate;
         }
 
         /**
          * Requires three standard modules
          */
-        public XorGate CreateNewXorGate()
+        public XorGate CreateNewXorGate(bool doMonitor = true)
         {
-            var nandGate = CreateNewNandGate();
-            var andGate = CreateNewAndGate();
-            var orGate = CreateNewOrGate();
-            return new XorGate(couplingService, nandGate, andGate, orGate);
+            var nandGate = CreateNewNandGate(doMonitor: false);
+            var andGate = CreateNewAndGate(doMonitor: false);
+            var orGate = CreateNewOrGate(doMonitor: false);
+            var gate = new XorGate(couplingService, nandGate, andGate, orGate);
+            if (doMonitor)
+            {
+                gateMonitor.RegisterGate(gate);
+            }
+            return gate;
         }
 
-        public NorGate CreateNewNorGate()
+        public NorGate CreateNewNorGate(bool doMonitor = true)
         {
-            var orGate = CreateNewOrGate();
-            var notGate = CreateNewNotGate();
-            return new NorGate(couplingService, orGate, notGate);
+            var orGate = CreateNewOrGate(doMonitor: false);
+            var notGate = CreateNewNotGate(doMonitor: false);
+            var gate = new NorGate(couplingService, orGate, notGate);
+            if (doMonitor)
+            {
+                gateMonitor.RegisterGate(gate);
+            }
+            return gate;
         }
 
-        public Buffer CreateNewBuffer()
+        public Buffer CreateNewBuffer(bool doMonitor = true)
         {
-            return new Buffer(couplingService, bidirectionalLatchFactory);
+            var gate = new Buffer(couplingService, bidirectionalLatchFactory);
+            if (doMonitor)
+            {
+                gateMonitor.RegisterGate(gate);
+            }
+            return gate;
         }
     }
 }

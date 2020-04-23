@@ -5,11 +5,6 @@ namespace KCSim.Parts.Logical
 {
     public class AndGate : Gate
     {
-        public readonly Axle Power = new Axle("OR gate power");
-        public readonly Axle InputA = new Axle("AND gate inputA");
-        public readonly Axle InputB = new Axle("AND gate inputB");
-        public readonly Axle Output = new Axle("AND gate output");
-
         public AndGate(
             ICouplingService couplingService,
             IBidirectionalLatchFactory bidirectionalLatchFactory)

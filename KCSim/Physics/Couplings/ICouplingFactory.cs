@@ -13,5 +13,7 @@ namespace KCSim.Physics.Couplings
         Coupling CreateNewOneWayCoupling(Gear input, Gear output, Direction direction, string name = "");
 
         Coupling CreateNewFreeFlowingCoupling(Torqueable input, Torqueable output, string name = "");
+
+        Coupling CreateNewInitialStateCoupling(Force initialForce, Torqueable output, string name = "");
     }
 }

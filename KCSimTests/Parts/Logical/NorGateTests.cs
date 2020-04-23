@@ -14,7 +14,7 @@ namespace KCSimTests.Parts.Logical
 
         private readonly ExternalSwitch inputASwitch = new ExternalSwitch();
         private readonly ExternalSwitch inputBSwitch = new ExternalSwitch();
-        private readonly ExternalSwitch motor = new ExternalSwitch();
+        private readonly ExternalSwitch motor = new ExternalSwitch(new Force(1));
         private readonly NorGate norGate;
 
         public NorGateTests()
@@ -22,14 +22,12 @@ namespace KCSimTests.Parts.Logical
             couplingMonitor = testUtil.GetSingletonCouplingMonitor();
             couplingService = testUtil.GetSingletonCouplingService();
 
-            var gateFactory = new GateFactory(couplingService, testUtil.GetMockBidirectionalLatchFactory().Object);
+            var gateFactory = testUtil.GetGateFactory();
             norGate = gateFactory.CreateNewNorGate();
 
             couplingService.CreateNewLockedCoupling(inputASwitch, norGate.InputA);
             couplingService.CreateNewLockedCoupling(inputBSwitch, norGate.InputB);
             couplingService.CreateNewLockedCoupling(motor, norGate.Power);
-
-            motor.Force = new Force(1);
         }
 
         [Theory]

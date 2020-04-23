@@ -1,6 +1,8 @@
 ﻿using KCSim;
+using KCSim.Parts.Logical;
 using KCSim.Parts.Mechanical;
 using KCSim.Parts.Mechanical.Machines;
+using KCSim.Parts.State;
 using KCSim.Physics;
 using KCSim.Physics.Couplings;
 using Moq;
@@ -73,6 +75,21 @@ namespace KCSimTests
             mockBidirectionalLatchFactory.Setup(x => x.CreateNew(It.IsAny<string>()))
                 .Returns<string>((name) => new BidirectionalLatch(GetSingletonCouplingService(), GetMockRelayFactory().Object, name: name));
             return mockBidirectionalLatchFactory;
+        }
+
+        public IGateMonitor GetGateMonitor()
+        {
+            return new GateMonitor();
+        }
+
+        public IGateFactory GetGateFactory()
+        {
+            return new GateFactory(GetSingletonCouplingService(), GetMockBidirectionalLatchFactory().Object, GetGateMonitor());
+        }
+
+        public IStateFactory GetStateFactory()
+        {
+            return new StateFactory(GetSingletonCouplingService(), GetGateFactory());
         }
     }
 }

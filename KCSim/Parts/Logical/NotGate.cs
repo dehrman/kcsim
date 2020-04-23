@@ -7,9 +7,6 @@ namespace KCSim.Parts.Logical
 {
     public class NotGate : Gate
     {
-        public readonly Axle Input = new Axle("NOT gate input");
-        public readonly Axle Output = new Axle("NOT gate output");
-
         public NotGate(
             ICouplingService couplingService) : base("NOT gate")
         {
