@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using KCSim;
 using KCSim.Parts.Logical;
 using KCSim.Parts.Mechanical;
@@ -85,7 +87,7 @@ namespace KCSimTests
         {
             if (gateMonitor == null)
             {
-                gateMonitor = new GateMonitor();
+                gateMonitor = new GateMonitor(GetSingletonCouplingMonitor());
             }
             return gateMonitor;
         }
@@ -142,8 +144,49 @@ namespace KCSimTests
 
         public static void AssertDirectionsEqual(Force force1, Force force2)
         {
+            if (force1.Equals(force2))
+            {
+                Assert.Equal(force1, force2);
+                return;
+            }
+
+            if (force1.Equals(Force.ZeroForce) || force2.Equals(Force.ZeroForce))
+            {
+                Assert.True(false);
+                return;
+            }
+
             var releveledForce1 = ToLevel(force1, force2);
             Assert.Equal(releveledForce1, force2);
+        }
+
+        public void InitializeState(StatefulGate gate)
+        {
+            couplingService.CreateNewInitialStateCoupling(new InitialState(), gate.Output);
+            couplingService.CreateNewInitialStateCoupling(new Force(new InitialState().Velocity * -1), gate.OutputInverse);
+        }
+
+        public static IDictionary<bool[], bool> GetTruthTable(int numInputs, Func<bool[], bool> predicate)
+        {
+            IDictionary<bool[], bool> truthTable = new Dictionary<bool[], bool>();
+
+            return Enumerable.Range(0, 1 << numInputs)
+                .Select(i => AsBooleanArray(numInputs, i))
+                .Select(inputs => new KeyValuePair<bool[], bool>(inputs, predicate.Invoke(inputs)))
+                .ToDictionary(
+                    keySelector: kvp => kvp.Key,
+                    elementSelector: kvp => kvp.Value);
+        }
+
+        private static bool[] AsBooleanArray(int numInputs, int number)
+        {
+            bool[] array = new bool[numInputs];
+            for (int i = 0; i < numInputs; i++)
+            {
+                array[i] = (number & 1) != 0;
+                number >>= 1;
+            }
+            return array;
         }
     }
 }

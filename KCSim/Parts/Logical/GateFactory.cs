@@ -1,4 +1,5 @@
-﻿using KCSim.Parts.Mechanical;
+﻿using System.Linq;
+using KCSim.Parts.Mechanical;
 
 namespace KCSim.Parts.Logical
 {
@@ -115,6 +116,34 @@ namespace KCSim.Parts.Logical
         public Buffer CreateNewBuffer(bool doMonitor = true)
         {
             var gate = new Buffer(couplingService, bidirectionalLatchFactory);
+            if (doMonitor)
+            {
+                gateMonitor.RegisterGate(gate);
+            }
+            return gate;
+        }
+
+        public MultiInputGate<AndGate> CreateNewMultiInputAndGate(int numInputs, bool doMonitor = true)
+        {
+            int numGates = numInputs - 1;
+            var gates = Enumerable.Range(0, numInputs - 1)
+                .Select(x => CreateNewAndGate(doMonitor: true))
+                .ToArray();
+            var gate = new MultiInputGate<AndGate>(numInputs, gates, couplingService, "multi-input AND gate");
+            if (doMonitor)
+            {
+                gateMonitor.RegisterGate(gate);
+            }
+            return gate;
+        }
+
+        public MultiInputGate<OrGate> CreateNewMultiInputOrGate(int numInputs, bool doMonitor = true)
+        {
+            int numGates = numInputs - 1;
+            var gates = Enumerable.Range(0, numInputs - 1)
+                .Select(x => CreateNewOrGate(doMonitor: true))
+                .ToArray();
+            var gate = new MultiInputGate<OrGate>(numInputs, gates, couplingService, "multi-input OR gate");
             if (doMonitor)
             {
                 gateMonitor.RegisterGate(gate);

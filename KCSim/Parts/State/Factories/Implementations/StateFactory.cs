@@ -21,12 +21,12 @@ namespace KCSim.Parts.State
 
         public SRLatch CreateNewSRLatch()
         {
-            return stateMonitor.RegisterStatefulGate(new SRLatch(couplingService, gateFactory));
+            return stateMonitor.RegisterGate(new SRLatch(couplingService, gateFactory));
         }
 
         public GatedDLatch CreateNewGatedDLatch()
         {
-            return stateMonitor.RegisterStatefulGate(new GatedDLatch(couplingService, gateFactory));
+            return stateMonitor.RegisterGate(new GatedDLatch(couplingService, gateFactory));
         }
     }
 }

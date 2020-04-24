@@ -19,5 +19,9 @@ namespace KCSim.Parts.Logical
         NorGate CreateNewNorGate(bool doMonitor = true);
 
         Buffer CreateNewBuffer(bool doMonitor = true);
+
+        MultiInputGate<AndGate> CreateNewMultiInputAndGate(int numInputs, bool doMonitor = true);
+
+        MultiInputGate<OrGate> CreateNewMultiInputOrGate(int numInputs, bool doMonitor = true);
     }
 }

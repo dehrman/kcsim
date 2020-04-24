@@ -28,6 +28,8 @@ namespace KCSimTests.Parts.State
             couplingService.CreateNewLockedCoupling(Power, latch.Power);
             couplingService.CreateNewLockedCoupling(DataIn, latch.Data);
             couplingService.CreateNewLockedCoupling(WriteEnable, latch.Enable);
+
+            testUtil.InitializeState(latch);
         }
 
         [Theory]

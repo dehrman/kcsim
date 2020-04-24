@@ -34,10 +34,6 @@ namespace KCSim.Parts.State
             couplingService.CreateNewLockedCoupling(nandGates[3].Output, OutputInverse);
             couplingService.CreateNewLockedCoupling(nandGates[3].Output, nandGates[2].InputB);
             couplingService.CreateNewLockedCoupling(nandGates[1].Output, nandGates[3].InputB);
-
-            // Initialize the outputs into a known deterministic state.
-            couplingService.CreateNewInitialStateCoupling(new InitialState(), Output);
-            couplingService.CreateNewInitialStateCoupling(new Force(new InitialState().Velocity * -1), OutputInverse);
         }
     }
 }
