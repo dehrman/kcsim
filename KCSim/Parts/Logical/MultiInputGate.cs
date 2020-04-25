@@ -56,5 +56,10 @@ namespace KCSim.Parts.Logical
             var lastAxle = disconnectedAxles.Dequeue();
             couplingService.CreateNewLockedCoupling(lastAxle, Output);
         }
+
+        public override bool RequiresPower()
+        {
+            return true;
+        }
     }
 }

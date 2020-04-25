@@ -29,5 +29,7 @@ namespace KCSim.Parts.Logical
         {
             return name;
         }
+
+        public abstract bool RequiresPower();
     }
 }

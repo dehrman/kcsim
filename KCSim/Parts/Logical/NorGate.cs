@@ -25,5 +25,10 @@ namespace KCSim.Parts.Logical
             // And don't forget to connect the power to the OR gate. (The NOT gate doesn't need power.)
             couplingService.CreateNewLockedCoupling(Power, orGate.Power);
         }
+
+        public override bool RequiresPower()
+        {
+            return true;
+        }
     }
 }

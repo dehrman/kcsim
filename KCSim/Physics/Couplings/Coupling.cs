@@ -24,14 +24,28 @@ namespace KCSim.Physics.Couplings
 
         public Torqueable GetOther(Torqueable torqueable)
         {
-            if (torqueable == Input)
+            if (IsInput(torqueable))
             {
                 return Output;
             }
-            else
+            else if (IsOutput(torqueable))
             {
                 return Input;
             }
+            else
+            {
+                throw new ArgumentException("provided torqueable " + torqueable + " is not a part of this coupling: " + this);
+            }
+        }
+
+        public bool IsInput(Torqueable torqueable)
+        {
+            return torqueable == Input;
+        }
+
+        public bool IsOutput(Torqueable torqueable)
+        {
+            return torqueable == Output;
         }
 
         /**

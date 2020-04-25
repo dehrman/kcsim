@@ -1,7 +1,4 @@
-﻿using KCSim.Parts.Mechanical;
-using KCSim.Parts.Mechanical.Atomic;
-
-namespace KCSim.Parts.Logical
+﻿namespace KCSim.Parts.Logical
 {
     public class XorGate : Gate
     {
@@ -25,6 +22,11 @@ namespace KCSim.Parts.Logical
             couplingService.CreateNewLockedCoupling(Power, nandGate.Power);
             couplingService.CreateNewLockedCoupling(Power, andGate.Power);
             couplingService.CreateNewLockedCoupling(Power, orGate.Power);
+        }
+
+        public override bool RequiresPower()
+        {
+            return true;
         }
     }
 }

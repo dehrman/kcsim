@@ -1,13 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using KCSim.Physics;
 using KCSim.Physics.Couplings;
+using static KCSim.ICouplingMonitor;
 
 namespace KCSim
 {
     public class CouplingMonitor : ICouplingMonitor
     {
+        private readonly IDictionary<Coupling, ISet<OnCouplingRemovedDelegate>> onCouplingRemovedDelegates
+            = new Dictionary<Coupling, ISet<OnCouplingRemovedDelegate>>();
+
+        private readonly IDictionary<Torqueable, ISet<OnCoupledToInputDelegate>> onCoupledToInputDelegates
+            = new Dictionary<Torqueable, ISet<OnCoupledToInputDelegate>>();
+
         private readonly IPartsGraph partsGraph;
         private readonly Queue<EvaluationNode> evaluationQueue;
 
@@ -17,16 +23,52 @@ namespace KCSim
             evaluationQueue = new Queue<EvaluationNode>();
         }
 
+        /**
+         * Invoke a delegate if the provided Coupling is removed.
+         */
+        public void OnCouplingRemoved(Coupling coupling, OnCouplingRemovedDelegate onCouplingRemovedDelegate)
+        {
+            onCouplingRemovedDelegates[coupling].Add(onCouplingRemovedDelegate);
+        }
+
+        /**
+         * Invoke a delegate if the provided Torqueable is coupled to an input (i.e. coupled as an output).
+         */
+        public void OnCoupledToInput(Torqueable torqueable, OnCoupledToInputDelegate onCoupledToInputDelegate)
+        {
+            onCoupledToInputDelegates[torqueable].Add(onCoupledToInputDelegate);
+        }
+
         public void RegisterCoupling(Coupling coupling)
         {
             partsGraph.AddVerticesAndEdge(coupling);
             AddToEvaluationQueue(coupling);
+
+            var delegates = onCoupledToInputDelegates[coupling.Output];
+            if (delegates == null)
+            {
+                return;
+            }
+            foreach (var onCoupledToInputDelegate in delegates)
+            {
+                onCoupledToInputDelegate?.Invoke(coupling);
+            }
         }
 
         public void RemoveCoupling(Coupling coupling)
         {
             partsGraph.RemoveEdge(coupling);
             AddToEvaluationQueue(coupling);
+
+            var delegates = onCouplingRemovedDelegates[coupling];
+            if (delegates == null)
+            {
+                return;
+            }
+            foreach (var onCouplingRemovedDelegate in delegates)
+            {
+                onCouplingRemovedDelegate?.Invoke(coupling);
+            }
         }
 
         public bool IsCoupled(Torqueable torqueable)

@@ -1,5 +1,4 @@
 ﻿using KCSim.Parts.Mechanical;
-using KCSim.Parts.Mechanical.Atomic;
 
 namespace KCSim.Parts.Logical
 {
@@ -45,6 +44,11 @@ namespace KCSim.Parts.Logical
                 inputLatchB.OutputAxlePositive,
                 Output,
                 "coupling from inputLatchB's positive output the the AND gate's output");
+        }
+
+        public override bool RequiresPower()
+        {
+            return true;
         }
     }
 }

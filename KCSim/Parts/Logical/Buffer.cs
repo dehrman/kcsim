@@ -28,5 +28,10 @@ namespace KCSim.Parts.Logical
             
             couplingService.CreateNewLockedCoupling(combinedOutput, Output);
         }
+
+        public override bool RequiresPower()
+        {
+            return true;
+        }
     }
 }

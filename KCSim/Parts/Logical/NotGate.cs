@@ -16,5 +16,10 @@ namespace KCSim.Parts.Logical
             couplingService.CreateNewGearCoupling(inputGear, outputGear);
             couplingService.CreateNewLockedCoupling(outputGear, Output);
         }
+
+        public override bool RequiresPower()
+        {
+            return true;
+        }
     }
 }

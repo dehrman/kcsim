@@ -171,22 +171,11 @@ namespace KCSimTests
             IDictionary<bool[], bool> truthTable = new Dictionary<bool[], bool>();
 
             return Enumerable.Range(0, 1 << numInputs)
-                .Select(i => AsBooleanArray(numInputs, i))
+                .Select(i => BitMath.GetBitVector(numInputs, i))
                 .Select(inputs => new KeyValuePair<bool[], bool>(inputs, predicate.Invoke(inputs)))
                 .ToDictionary(
                     keySelector: kvp => kvp.Key,
                     elementSelector: kvp => kvp.Value);
-        }
-
-        private static bool[] AsBooleanArray(int numInputs, int number)
-        {
-            bool[] array = new bool[numInputs];
-            for (int i = 0; i < numInputs; i++)
-            {
-                array[i] = (number & 1) != 0;
-                number >>= 1;
-            }
-            return array;
         }
     }
 }
