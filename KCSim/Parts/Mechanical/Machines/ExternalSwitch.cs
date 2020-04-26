@@ -7,7 +7,8 @@ namespace KCSim.Parts.Mechanical.Machines
 {
     public class ExternalSwitch : Torqueable
     {
-        private Force force;
+        private readonly string name;
+        private Force force = null;
 
         public ExternalSwitch(string name = "") : base(name)
         {
@@ -17,6 +18,7 @@ namespace KCSim.Parts.Mechanical.Machines
             Force initialForce,
             string name = "") : base(name)
         {
+            this.name = name;
             this.force = initialForce;
         }
 
@@ -32,5 +34,12 @@ namespace KCSim.Parts.Mechanical.Machines
         }
 
         public Force Force { get => force; set => force = value; }
+
+        public override string ToString()
+        {
+            return "External switch \"" + name + "\": {net force="
+                   + (force == null ? "(null)" : force.ToString())
+                   + "}";
+        }
     }
 }

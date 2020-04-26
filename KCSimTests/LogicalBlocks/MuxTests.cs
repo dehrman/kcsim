@@ -37,7 +37,7 @@ namespace KCSimTests.LogicalBlocks
         [InlineData(7)]
         [InlineData(8)]
         [InlineData(9)]
-        public void TestThat_Something(int numInputs)
+        public void TestThat_MuxSelectsAppropriateInputs(int numInputs)
         {
             var mux = new Mux(couplingService, gateFactory, numInputs);
             couplingService.CreateNewLockedCoupling(motor, mux.Power);
@@ -62,11 +62,16 @@ namespace KCSimTests.LogicalBlocks
             // Test that when its select line matches 
             for (int inputToExpectOnOutput = 0; inputToExpectOnOutput < numInputs; inputToExpectOnOutput++)
             {
-                Enumerable.Range(0, numInputs).Select(i => inputs[i].Force = Force.ZeroForce);
+                for (int i = 0; i < numInputs; i++)
+                {
+                    inputs[i].Force = new Force(-1);
+                }
                 inputs[inputToExpectOnOutput].Force = new Force(1);
                 bool[] shouldSetSelectLine = BitMath.GetBitVector(numSelectBits, inputToExpectOnOutput);
-                Enumerable.Range(0, numSelectBits)
-                    .Select(i => selectLines[i].Force = new Force(shouldSetSelectLine[i] ? 1 : -1));
+                for (int i = 0; i < numSelectBits; i++)
+                {
+                    selectLines[i].Force = new Force(shouldSetSelectLine[i] ? 1 : -1);
+                }
 
                 forceEvaluator.EvaluateForces();
 

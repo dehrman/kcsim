@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics.Contracts;
-using System.Linq;
+﻿using System.Linq;
 using KCSim.Parts.Logical;
 using KCSim.Parts.Mechanical.Atomic;
 
@@ -67,19 +65,18 @@ namespace KCSim.LogicalBlocks
             
             for (int i = 0; i < numSelectBits; i++)
             {
-                Axle inputForAndGate;
                 if (bitRequiresNotGate[i])
                 {
                     var notGate = gateFactory.CreateNewNotGate();
                     couplingService.CreateNewLockedCoupling(Select[i], notGate.Input);
-                    inputForAndGate = notGate.Output;
+                    couplingService.CreateNewLockedCoupling(notGate.Output, andGate.Inputs[i]);
                 }
                 else
                 {
-                    inputForAndGate = Select[i];
+                    couplingService.CreateNewLockedCoupling(Select[i], andGate.Inputs[i]);
                 }
 
-                couplingService.CreateNewLockedCoupling(inputForAndGate, andGate.Inputs[i]);
+                
             }
         }
     }
