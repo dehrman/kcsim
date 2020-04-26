@@ -9,7 +9,7 @@ namespace KCSimTests.Parts.Logical
     public class NotGateTests
     {
         private readonly TestUtil testUtil = new TestUtil();
-        private readonly ICouplingMonitor couplingMonitor;
+        private readonly ForceEvaluator forceEvaluator;
         private readonly ICouplingService couplingService;
 
         private readonly ExternalSwitch inputSwitch = new ExternalSwitch();
@@ -17,7 +17,7 @@ namespace KCSimTests.Parts.Logical
 
         public NotGateTests()
         {
-            couplingMonitor = testUtil.GetSingletonCouplingMonitor();
+            forceEvaluator = testUtil.GetSingletonForceEvaluator();
             couplingService = testUtil.GetSingletonCouplingService();
 
             var gateFactory = testUtil.GetGateFactory();
@@ -33,7 +33,7 @@ namespace KCSimTests.Parts.Logical
         public void TestThat_TruthTableHolds(int input, int expectedOutput)
         {
             inputSwitch.Force = new Force(input);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             Assert.Equal(new Force(expectedOutput), notGate.Output.GetNetForce());
         }
     }

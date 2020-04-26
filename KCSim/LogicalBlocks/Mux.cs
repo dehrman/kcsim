@@ -6,9 +6,8 @@ using KCSim.Parts.Mechanical.Atomic;
 
 namespace KCSim.LogicalBlocks
 {
-    public class Mux : Gate
+    public class Mux : LogicalBlock
     {
-        public readonly Axle[] Inputs;
         public readonly Axle[] Select;
 
         private readonly ICouplingService couplingService;
@@ -18,12 +17,15 @@ namespace KCSim.LogicalBlocks
             ICouplingService couplingService,
             IGateFactory gateFactory,
             int numInputs,
-            string name = "mux") : base(name)
+            string name = "mux") : base(
+                  numInputs: numInputs,
+                  numOutputs: 1,
+                  name: name)
         {
             this.couplingService = couplingService;
             this.gateFactory = gateFactory;
 
-            // Create the select bit wires.
+            // Create the select bit lines.
             int numSelectBits = BitMath.GetNumSelectBitsRequired(numInputs);
             Select = Enumerable.Range(0, numSelectBits)
                 .Select(i => new Axle(name + "; select bit " + i))
@@ -45,11 +47,6 @@ namespace KCSim.LogicalBlocks
             }
 
             couplingService.CreateNewLockedCoupling(orGate.Output, Output);
-        }
-
-        public override bool RequiresPower()
-        {
-            return true;
         }
 
         private void ConnectSelectLines(int selectIndex, MultiInputGate<AndGate> andGate)

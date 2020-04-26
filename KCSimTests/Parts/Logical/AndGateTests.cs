@@ -9,7 +9,7 @@ namespace KCSimTests.Parts.Logical
     public class AndGateTests
     {
         private readonly TestUtil testUtil = new TestUtil();
-        private readonly ICouplingMonitor couplingMonitor;
+        private readonly ForceEvaluator forceEvaluator;
         private readonly ICouplingService couplingService;
 
         private readonly ExternalSwitch inputASwitch = new ExternalSwitch();
@@ -19,7 +19,7 @@ namespace KCSimTests.Parts.Logical
 
         public AndGateTests()
         {
-            couplingMonitor = testUtil.GetSingletonCouplingMonitor();
+            forceEvaluator = testUtil.GetSingletonForceEvaluator();
             couplingService = testUtil.GetSingletonCouplingService();
 
             IGateFactory gateFactory = testUtil.GetGateFactory();
@@ -39,7 +39,7 @@ namespace KCSimTests.Parts.Logical
         {
             inputASwitch.Force = new Force(inputA);
             inputBSwitch.Force = new Force(inputB);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             Assert.Equal(new Force(expectedOutput), andGate.Output.GetNetForce());
         }
     }

@@ -23,6 +23,7 @@ namespace KCSim
 
             // 2. Configure the container (register)
             container.Register<IMotionTimer, MotionTimer>();
+            container.Register<ForceEvaluator>();
             container.Register<Simulator>();
 
             // 3. Verify your configuration

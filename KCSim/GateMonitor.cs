@@ -79,7 +79,7 @@ namespace KCSim
             }
 
             // Update this monitor any time the gate's power is attached to an input.
-            couplingMonitor.OnCoupledToInput(gate.Power, c => gatePower[gate].Add(c.Input));
+            couplingMonitor.OnCoupledToInput(gate.Power, c => AddInputToGatePowerDictionary(gate, c.Input));
 
             // Get existing couplings where this gate's power is an output.
             var inputCouplings = partsGraph.GetCouplings(gate.Power)
@@ -91,8 +91,26 @@ namespace KCSim
             {
                 // Add this coupling to this monitor's knowledge of inputs attached to this gate's power.
                 gatePower[gate].Add(coupling.Input);
-                couplingMonitor.OnCouplingRemoved(coupling, c => gatePower[gate].Remove(c.Input));
+                couplingMonitor.OnCouplingRemoved(coupling, c => RemoveInputFromGatePowerDictionary(gate, c.Input));
             }
+        }
+
+        private void AddInputToGatePowerDictionary(Gate gate, Torqueable input)
+        {
+            if (!gatePower.ContainsKey(gate))
+            {
+                gatePower[gate] = new HashSet<Torqueable>();
+            }
+            gatePower[gate].Add(input);
+        }
+
+        private void RemoveInputFromGatePowerDictionary(Gate gate, Torqueable input)
+        {
+            if (!gatePower.ContainsKey(gate))
+            {
+                return;
+            }
+            gatePower[gate].Remove(input);
         }
 
         private void MonitorForceChanges<T>(T gate) where T : Gate
@@ -101,6 +119,7 @@ namespace KCSim
                 .Where(field => typeof(Torqueable).IsAssignableFrom(field.FieldType))
                 .Select(field => field.GetValue(gate))
                 .Cast<Torqueable>()
+                .Where(torqueable => torqueable != null)
                 .Where(torqueable => couplingMonitor.IsCoupled(torqueable))
                 .ToHashSet();
 
@@ -112,6 +131,7 @@ namespace KCSim
             ISet<Torqueable[]> torqueableArrays = gate.GetType().GetFields()
                 .Where(field => typeof(Torqueable[]).IsAssignableFrom(field.FieldType))
                 .Select(field => field.GetValue(gate))
+                .Where(torqueableArray => torqueableArray != null)
                 .Cast<Torqueable[]>()
                 .ToHashSet();
 

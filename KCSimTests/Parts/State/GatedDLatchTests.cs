@@ -9,8 +9,8 @@ namespace KCSimTests.Parts.State
     public class GatedDLatchTests
     {
         private readonly TestUtil testUtil = new TestUtil();
+        private readonly ForceEvaluator forceEvaluator;
         private readonly ICouplingService couplingService;
-        private readonly ICouplingMonitor couplingMonitor;
 
         private ExternalSwitch Power = new ExternalSwitch(new Force(1));
         private ExternalSwitch DataIn = new ExternalSwitch();
@@ -21,7 +21,7 @@ namespace KCSimTests.Parts.State
         public GatedDLatchTests()
         {
             couplingService = testUtil.GetSingletonCouplingService();
-            couplingMonitor = testUtil.GetSingletonCouplingMonitor();
+            forceEvaluator = testUtil.GetSingletonForceEvaluator();
 
             latch = testUtil.GetStateFactory().CreateNewGatedDLatch();
 
@@ -40,7 +40,7 @@ namespace KCSimTests.Parts.State
             DataIn.Force = new Force(valueToLatch);
             WriteEnable.Force = new Force(1);
 
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
 
             var latchedValue = latch.Output.GetNetForce().Velocity;
             Assert.Equal(new Force(valueToLatch), new Force(latchedValue));
@@ -57,12 +57,12 @@ namespace KCSimTests.Parts.State
             // Latch in the initial value.
             DataIn.Force = new Force(initialValue);
             WriteEnable.Force = new Force(1);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
 
             // Now disable the write enable and set the data input to the next value.
             WriteEnable.Force = new Force(-1);
             DataIn.Force = new Force(nextValue);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
 
             // We should expect to still see the initially latched-in value on the output wire.
             Assert.Equal(new Force(initialValue), latch.Output.GetNetForce());

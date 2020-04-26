@@ -14,7 +14,7 @@ namespace KCSimTests.Parts.Logical
         private readonly TestUtil testUtil = new TestUtil();
         private readonly IGateFactory gateFactory;
         private readonly ICouplingService couplingService;
-        private readonly ICouplingMonitor couplingMonitor;
+        private readonly ForceEvaluator forceEvaluator;
 
         private readonly ExternalSwitch motor = new ExternalSwitch(new Force(1));
 
@@ -22,7 +22,7 @@ namespace KCSimTests.Parts.Logical
         {
             gateFactory = testUtil.GetGateFactory();
             couplingService = testUtil.GetSingletonCouplingService();
-            couplingMonitor = testUtil.GetSingletonCouplingMonitor();
+            forceEvaluator = testUtil.GetSingletonForceEvaluator();
         }
 
         [Theory]
@@ -81,7 +81,7 @@ namespace KCSimTests.Parts.Logical
                     initialStateCouplings[i] = coupling;
                 }
 
-                couplingMonitor.EvaluateForces();
+                forceEvaluator.EvaluateForces();
 
                 TestUtil.AssertDirectionsEqual(new Force(expectedOutput ? 1 : -1), gate.Output.GetNetForce());
 

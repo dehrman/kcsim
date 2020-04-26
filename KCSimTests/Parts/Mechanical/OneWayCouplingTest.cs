@@ -13,7 +13,7 @@ namespace KCSimTests.Parts.Mechanical
     public class OneWayCouplingTest
     {
         private readonly TestUtil testUtil = new TestUtil();
-        private readonly ICouplingMonitor couplingMonitor;
+        private readonly ForceEvaluator forceEvaluator;
         private readonly ICouplingService couplingService;
 
         private readonly ExternalSwitch input = new ExternalSwitch("input1");
@@ -25,7 +25,7 @@ namespace KCSimTests.Parts.Mechanical
 
         public OneWayCouplingTest()
         {
-            couplingMonitor = testUtil.GetSingletonCouplingMonitor();
+            forceEvaluator = testUtil.GetSingletonForceEvaluator();
             couplingService = testUtil.GetSingletonCouplingService();
             couplingService.CreateNewLockedCoupling(input, inputGear);
         }
@@ -38,7 +38,7 @@ namespace KCSimTests.Parts.Mechanical
         {
             input.Force = new Force(inputValue);
             couplingService.CreateNewOneWayCoupling(inputGear, outputGear, Direction.Positive);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             Assert.Equal(expectedOutput, outputGear.GetNetForce().Velocity);
         }
 
@@ -50,7 +50,7 @@ namespace KCSimTests.Parts.Mechanical
         {
             input.Force = new Force(inputValue);
             couplingService.CreateNewOneWayCoupling(inputGear, outputGear, Direction.Negative);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             Assert.Equal(expectedOutput, outputGear.GetNetForce().Velocity);
         }
     }

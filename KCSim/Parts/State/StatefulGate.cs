@@ -21,5 +21,10 @@ namespace KCSim.Parts.State
             Q = Output;
             QInverse = OutputInverse;
         }
+
+        public override bool RequiresPower()
+        {
+            return true;
+        }
     }
 }

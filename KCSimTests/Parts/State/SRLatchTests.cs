@@ -9,8 +9,8 @@ namespace KCSimTests.Parts.State
     public class SRLatchTests
     {
         private readonly TestUtil testUtil = new TestUtil();
+        private readonly ForceEvaluator forceEvaluator;
         private readonly ICouplingService couplingService;
-        private readonly ICouplingMonitor couplingMonitor;
 
         private ExternalSwitch Power = new ExternalSwitch(new Force(1));
         private ExternalSwitch SetInverse = new ExternalSwitch();
@@ -21,7 +21,7 @@ namespace KCSimTests.Parts.State
         public SRLatchTests()
         {
             couplingService = testUtil.GetSingletonCouplingService();
-            couplingMonitor = testUtil.GetSingletonCouplingMonitor();
+            forceEvaluator = testUtil.GetSingletonForceEvaluator();
 
             latch = testUtil.GetStateFactory().CreateNewSRLatch();
 
@@ -39,7 +39,7 @@ namespace KCSimTests.Parts.State
         {
             SetInverse.Force = new Force(setInverse);
             ResetInverse.Force = new Force(resetInverse);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
 
             TestUtil.AssertDirectionsEqual(new Force(expectedOutput), latch.Output.GetNetForce());
             TestUtil.AssertDirectionsEqual(new Force(expectedOutput * -1), latch.OutputInverse.GetNetForce());
@@ -50,9 +50,9 @@ namespace KCSimTests.Parts.State
         {
             SetInverse.Force = new Force(-1);
             ResetInverse.Force = new Force(1);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             SetInverse.Force = new Force(1);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
 
             TestUtil.AssertDirectionsEqual(new Force(1), latch.Output.GetNetForce());
             TestUtil.AssertDirectionsEqual(new Force(-1), latch.OutputInverse.GetNetForce());

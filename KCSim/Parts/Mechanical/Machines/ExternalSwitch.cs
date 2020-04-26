@@ -24,7 +24,9 @@ namespace KCSim.Parts.Mechanical.Machines
         {
             if (force == null)
             {
-                throw new InvalidOperationException("attempt to get force from external switch before force has been set");
+                throw new InvalidOperationException("attempt to get force from external switch "
+                    + ToString()
+                    + " before force has been set");
             }
             return new KeyValuePair<Torqueable, Force>(this, force);
         }

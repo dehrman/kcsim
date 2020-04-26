@@ -8,11 +8,15 @@ namespace KCSimTests
     public class RelayTests
     {
         private readonly TestUtil testUtil = new TestUtil();
-        private ICouplingMonitor couplingMonitor;
-        private ICouplingService couplingService;
+        private readonly ForceEvaluator forceEvaluator;
 
         private readonly ExternalSwitch enable = new ExternalSwitch(name: "enable switch");
         private readonly ExternalSwitch input = new ExternalSwitch(name: "input switch");
+
+        public RelayTests()
+        {
+            forceEvaluator = testUtil.GetSingletonForceEvaluator();
+        }
 
         [Theory]
         [InlineData(-1, -1)]
@@ -24,7 +28,7 @@ namespace KCSimTests
             enable.Force = Force.ZeroForce;
             input.Force = GetLatchedInputForce(latchedInputForce);
             var relay = GetRelay(enableForce, latchedInputForce);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             Assert.Equal(Force.ZeroForce, relay.OutputAxle.GetNetForce());
         }
 
@@ -38,7 +42,7 @@ namespace KCSimTests
             enable.Force = GetEnableForce(enableForce);
             input.Force = GetLatchedInputForce(latchedInputForce);
             var relay = GetRelay(enableForce, latchedInputForce);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             Assert.Equal(GetLatchedInputForce(latchedInputForce), relay.OutputAxle.GetNetForce());
         }
 
@@ -52,7 +56,7 @@ namespace KCSimTests
             enable.Force = GetDisableForce(enableForce);
             input.Force = GetLatchedInputForce(latchedInputForce);
             var relay = GetRelay(enableForce, latchedInputForce);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             Assert.Equal(Force.ZeroForce, relay.OutputAxle.GetNetForce());
         }
 
@@ -66,7 +70,7 @@ namespace KCSimTests
             enable.Force = GetEnableForce(enableForce);
             input.Force = GetNonLatchedInputForce(latchedInputForce);
             var relay = GetRelay(enableForce, latchedInputForce);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             Assert.Equal(Force.ZeroForce, relay.OutputAxle.GetNetForce());
         }
 
@@ -80,11 +84,11 @@ namespace KCSimTests
             enable.Force = GetEnableForce(enableForce);
             input.Force = GetLatchedInputForce(latchedInputForce);
             var relay = GetRelay(enableForce, latchedInputForce);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             Assert.Equal(GetLatchedInputForce(latchedInputForce), relay.OutputAxle.GetNetForce());
 
             enable.Force = Force.ZeroForce;
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             Assert.Equal(GetLatchedInputForce(latchedInputForce), relay.OutputAxle.GetNetForce());
         }
 
@@ -98,10 +102,10 @@ namespace KCSimTests
             enable.Force = GetEnableForce(enableForce);
             input.Force = GetLatchedInputForce(latchedInputForce);
             var relay = GetRelay(enableForce, latchedInputForce);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
 
             enable.Force = GetDisableForce(enableForce);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
 
             Assert.Equal(GetLatchedInputForce(latchedInputForce), relay.OutputAxle.GetNetForce());
         }
@@ -128,8 +132,7 @@ namespace KCSimTests
 
         private Relay GetRelay(int enableForce, int latchedInputForce)
         {
-            couplingMonitor = testUtil.GetSingletonCouplingMonitor();
-            couplingService = testUtil.GetSingletonCouplingService();
+            var couplingService = testUtil.GetSingletonCouplingService();
             var relay = new Relay(
                 couplingService: couplingService,
                 paddleFactory: testUtil.GetMockPaddleFactory().Object,

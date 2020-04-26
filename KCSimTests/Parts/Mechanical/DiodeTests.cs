@@ -9,7 +9,7 @@ namespace KCSimTests
     public class DiodeTests
     {
         private readonly TestUtil testUtil = new TestUtil();
-        private readonly ICouplingMonitor couplingMonitor;
+        private readonly ForceEvaluator forceEvaluator;
         private readonly ICouplingService couplingService;
 
         private readonly ExternalSwitch input1 = new ExternalSwitch("input1");
@@ -18,7 +18,7 @@ namespace KCSimTests
 
         public DiodeTests()
         {
-            couplingMonitor = testUtil.GetSingletonCouplingMonitor();
+            forceEvaluator = testUtil.GetSingletonForceEvaluator();
             couplingService = testUtil.GetSingletonCouplingService();
             positiveDiode = new Diode(couplingService, Direction.Positive);
             negativeDiode = new Diode(couplingService, Direction.Negative);
@@ -33,7 +33,7 @@ namespace KCSimTests
         public void TestThat_PositiveInput_Yields_EquivalentPositiveOutput(int value)
         {
             input1.Force = new Force(value);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             Assert.Equal(value, positiveDiode.OutputAxle.GetNetForce().Velocity);
         }
 
@@ -50,7 +50,7 @@ namespace KCSimTests
             couplingService.CreateNewLockedCoupling(input3, positiveDiode.InputAxle);
             input3.Force = new Force(2);
 
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             Assert.Equal(3, positiveDiode.OutputAxle.GetNetForce().Velocity);
         }
 
@@ -68,13 +68,13 @@ namespace KCSimTests
             input3.Force = new Force(2);
 
             // Do a force evaluation.
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
 
             // Now remove the highest force (3).
             input2.Force = Force.ZeroForce;
 
             // Now evaluate the forces again.
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
 
             // The output should be equivalent to the next highest force, that is 2 instead of 3.
             Assert.Equal(2, positiveDiode.OutputAxle.GetNetForce().Velocity);

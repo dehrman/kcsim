@@ -51,9 +51,9 @@ namespace KCSim.Physics.Couplings
 
         protected override void ReceiveForceOnOutput(Force force)
         {
-            if (!Force.ZeroForce.Equals(initialForce))
+            if (!force.Equals(Force.ZeroForce) && !force.Equals(initialForce))
             {
-                shouldApplyInitialForce = true;
+                shouldApplyInitialForce = false;
             }
         }
     }

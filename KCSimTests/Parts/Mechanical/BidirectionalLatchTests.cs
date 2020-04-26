@@ -12,7 +12,7 @@ namespace KCSimTests
     public class BidirectionalLatchTests
     {
         private readonly TestUtil testUtil = new TestUtil();
-        private readonly ICouplingMonitor couplingMonitor;
+        private readonly ForceEvaluator forceEvaluator;
         private readonly ICouplingService couplingService;
 
         private readonly ExternalSwitch inputSwitch = new ExternalSwitch();
@@ -21,7 +21,7 @@ namespace KCSimTests
 
         public BidirectionalLatchTests()
         {
-            couplingMonitor = testUtil.GetSingletonCouplingMonitor();
+            forceEvaluator = testUtil.GetSingletonForceEvaluator();
             couplingService = testUtil.GetSingletonCouplingService();
 
             bidirectionalLatch = new BidirectionalLatch(
@@ -40,7 +40,7 @@ namespace KCSimTests
         {
             motor.Force = new Force(1);
             inputSwitch.Force = new Force(input);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             Assert.Equal(new Force(expectedNegativeOutput), bidirectionalLatch.OutputAxleNegative.GetNetForce());
             Assert.Equal(new Force(expectedPositiveOutput), bidirectionalLatch.OutputAxlePositive.GetNetForce());
         }
@@ -57,9 +57,9 @@ namespace KCSimTests
             // invokes its callback functions immediately in test environments. In a real simulation (which
             // is an oxymoron), we would need to wait some time before removing the force on the control axle.
             inputSwitch.Force = new Force(input);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             inputSwitch.Force = Force.ZeroForce;
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
 
             Assert.Equal(new Force(expectedNegativeOutput), bidirectionalLatch.OutputAxleNegative.GetNetForce());
             Assert.Equal(new Force(expectedPositiveOutput), bidirectionalLatch.OutputAxlePositive.GetNetForce());
@@ -70,7 +70,7 @@ namespace KCSimTests
         {
             motor.Force = Force.ZeroForce;
             inputSwitch.Force = new Force(1);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             Assert.Equal(Force.ZeroForce, bidirectionalLatch.OutputAxleNegative.GetNetForce());
             Assert.Equal(Force.ZeroForce, bidirectionalLatch.OutputAxlePositive.GetNetForce());
         }

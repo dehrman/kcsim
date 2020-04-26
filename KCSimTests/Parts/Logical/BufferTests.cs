@@ -9,7 +9,7 @@ namespace KCSimTests.Parts.Logical
     public class BufferTests
     {
         private readonly TestUtil testUtil = new TestUtil();
-        private readonly ICouplingMonitor couplingMonitor;
+        private readonly ForceEvaluator forceEvaluator;
         private readonly ICouplingService couplingService;
 
         private readonly ExternalSwitch inputSwitch = new ExternalSwitch();
@@ -19,7 +19,7 @@ namespace KCSimTests.Parts.Logical
 
         public BufferTests()
         {
-            couplingMonitor = testUtil.GetSingletonCouplingMonitor();
+            forceEvaluator = testUtil.GetSingletonForceEvaluator();
             couplingService = testUtil.GetSingletonCouplingService();
 
             IGateFactory gateFactory = testUtil.GetGateFactory();
@@ -37,7 +37,7 @@ namespace KCSimTests.Parts.Logical
         {
             inputSwitch.Force = new Force(input);
             motor.Force = new Force(power);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             Assert.Equal(new Force(expectedOutput), buffer.Output.GetNetForce());
         }
 
@@ -52,7 +52,7 @@ namespace KCSimTests.Parts.Logical
         {
             inputSwitch.Force = new Force(input);
             motor.Force = new Force(power);
-            couplingMonitor.EvaluateForces();
+            forceEvaluator.EvaluateForces();
             Assert.Equal(Force.ZeroForce, buffer.Output.GetNetForce());
         }
     }

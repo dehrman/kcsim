@@ -19,12 +19,32 @@ namespace KCSimTests
         private ICouplingMonitor couplingMonitor = null;
         private IGateMonitor gateMonitor = null;
         private IStateMonitor stateMonitor = null;
+        private IPartsGraph partsGraph = null;
+        private ForceEvaluator forceEvaluator = null;
+
+        public ForceEvaluator GetSingletonForceEvaluator()
+        {
+            if (forceEvaluator == null)
+            {
+                forceEvaluator = new ForceEvaluator(GetSingletonPartsGraph());
+            }
+            return forceEvaluator;
+        }
+
+        public IPartsGraph GetSingletonPartsGraph()
+        {
+            if (partsGraph == null)
+            {
+                partsGraph = new PartsGraph();
+            }
+            return partsGraph;
+        }
 
         public ICouplingMonitor GetSingletonCouplingMonitor()
         {
             if (couplingMonitor == null)
             {
-                couplingMonitor = new CouplingMonitor(new PartsGraph());
+                couplingMonitor = new CouplingMonitor(GetSingletonPartsGraph(), GetSingletonForceEvaluator());
             }
             return couplingMonitor;
         }
@@ -87,7 +107,7 @@ namespace KCSimTests
         {
             if (gateMonitor == null)
             {
-                gateMonitor = new GateMonitor(GetSingletonCouplingMonitor());
+                gateMonitor = new GateMonitor(GetSingletonPartsGraph(), GetSingletonCouplingMonitor());
             }
             return gateMonitor;
         }
