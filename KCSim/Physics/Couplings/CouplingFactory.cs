@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using KCSim.Parts.Mechanical.Atomic;
+using KCSim.Parts.State;
 
 namespace KCSim.Physics.Couplings
 {
@@ -22,7 +23,7 @@ namespace KCSim.Physics.Couplings
             return new BidirectionalOpposingCoupling(input, output, GetInputToOutputRatio(input, output), name);
         }
 
-        public Coupling CreateNewInitialStateCoupling(Force initialForce, Torqueable output, string name = "")
+        public Coupling CreateNewInitialStateCoupling(InitialState initialForce, Torqueable output, string name = "")
         {
             return new InitialStateCoupling(initialForce, output, name);
         }

@@ -1,4 +1,5 @@
 ﻿using KCSim.Parts.Mechanical.Atomic;
+using KCSim.Parts.State;
 using KCSim.Physics;
 using KCSim.Physics.Couplings;
 
@@ -60,7 +61,7 @@ namespace KCSim
             return coupling;
         }
 
-        public Coupling CreateNewInitialStateCoupling(Force initialForce, Torqueable output, string name = "")
+        public Coupling CreateNewInitialStateCoupling(InitialState initialForce, Torqueable output, string name = "")
         {
             Coupling coupling = couplingFactory.CreateNewInitialStateCoupling(initialForce, output, name);
             couplingMonitor.RegisterCoupling(coupling);

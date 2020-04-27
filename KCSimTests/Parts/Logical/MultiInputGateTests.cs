@@ -77,7 +77,7 @@ namespace KCSimTests.Parts.Logical
                 for (int i = 0; i < inputs.Length; i++)
                 {
                     var input = inputs[i] ? new Force(1) : new Force(-1);
-                    var coupling = couplingService.CreateNewInitialStateCoupling(input, gate.Inputs[i]);
+                    var coupling = couplingService.CreateNewLockedCoupling(new ExternalSwitch(input), gate.Inputs[i]);
                     initialStateCouplings[i] = coupling;
                 }
 

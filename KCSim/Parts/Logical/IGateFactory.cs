@@ -6,7 +6,7 @@ namespace KCSim.Parts.Logical
 {
     public interface IGateFactory
     {
-        AndGate CreateNewAndGate(bool doMonitor = true);
+        AndGate CreateNewAndGate(bool doMonitor = true, string name = null);
 
         OrGate CreateNewOrGate(bool doMonitor = true);
 

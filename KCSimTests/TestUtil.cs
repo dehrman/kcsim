@@ -190,7 +190,7 @@ namespace KCSimTests
         public void InitializeState(StatefulGate gate)
         {
             couplingService.CreateNewInitialStateCoupling(new InitialState(), gate.Q);
-            couplingService.CreateNewInitialStateCoupling(new Force(new InitialState().Velocity * -1), gate.QInverse);
+            couplingService.CreateNewInitialStateCoupling(new InitialState(new InitialState().Velocity * -1), gate.QInverse);
         }
 
         public static IDictionary<bool[], bool> GetTruthTable(int numInputs, Func<bool[], bool> predicate)

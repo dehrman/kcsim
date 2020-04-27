@@ -34,7 +34,7 @@ namespace KCSimTests.Parts.State
 
         [Theory]
         [InlineData(-1, 1, 1)]
-        [InlineData(1, -2, -2)]
+        [InlineData(1, -1, -1)]
         public void TestThat_TruthTableHolds(int setInverse, int resetInverse, int expectedOutput)
         {
             SetInverse.Force = new Force(setInverse);
@@ -58,6 +58,33 @@ namespace KCSimTests.Parts.State
             TestUtil.AssertDirectionsEqual(new Force(-1), latch.QInverse.GetNetForce());
         }
 
-        public void TestThat_LatchHolds
+        [Theory]
+        [InlineData(-1, 1)]
+        [InlineData(1, -1)]
+        public void TestThat_LatchSeesNewValue(int oldValue, int newValue)
+        {
+            // Latch in the initial value.
+            SetInverse.Force = new Force(oldValue * -1);
+            ResetInverse.Force = new Force(oldValue);
+            forceEvaluator.EvaluateForces();
+
+            // Hold the value.
+            SetInverse.Force = new Force(1);
+            ResetInverse.Force = new Force(1);
+            forceEvaluator.EvaluateForces(); // There's a bug on this line; after the completion of this function, the second (lower) NAND gate reports an output of -1 despite its inputs being [-1, 1]
+
+            // Latch in the new value.
+            SetInverse.Force = new Force(newValue * -1);
+            ResetInverse.Force = new Force(newValue);
+            forceEvaluator.EvaluateForces();
+
+            // Hold the value.
+            SetInverse.Force = new Force(1);
+            ResetInverse.Force = new Force(1);
+            forceEvaluator.EvaluateForces();
+
+            TestUtil.AssertDirectionsEqual(new Force(newValue), latch.Q.GetNetForce());
+            TestUtil.AssertDirectionsEqual(new Force(newValue * -1), latch.QInverse.GetNetForce());
+        }
     }
 }

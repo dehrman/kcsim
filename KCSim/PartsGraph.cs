@@ -11,10 +11,12 @@ namespace KCSim
     public class PartsGraph : IPartsGraph
     {
         private readonly Dictionary<Torqueable, ISet<Coupling>> graph;
+        private readonly ISet<Coupling> registeredCouplings;
 
         public PartsGraph()
         {
             graph = new Dictionary<Torqueable, ISet<Coupling>>();
+            registeredCouplings = new HashSet<Coupling>();
         }
 
         public void AddVerticesAndEdge(Coupling coupling)
@@ -30,18 +32,26 @@ namespace KCSim
                 graph[coupling.Output] = new HashSet<Coupling>();
             }
             graph[coupling.Output].Add(coupling);
+
+            registeredCouplings.Add(coupling);
         }
 
         public void RemoveEdge(Coupling coupling)
         {
             graph[coupling.Input].Remove(coupling);
             graph[coupling.Output].Remove(coupling);
+            registeredCouplings.Remove(coupling);
         }
 
         public ISet<Coupling> GetCouplings(Torqueable node)
         {
             ISet<Coupling> couplings = graph.GetValueOrDefault(node, ImmutableHashSet<Coupling>.Empty);
             return new HashSet<Coupling>(couplings);
+        }
+
+        public bool IsEdgeStillPresent(Coupling coupling)
+        {
+            return registeredCouplings.Contains(coupling);
         }
 
         public IEnumerable<KeyValuePair<Torqueable, Coupling>> GetLeafVertices()

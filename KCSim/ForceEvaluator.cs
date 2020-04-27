@@ -50,12 +50,22 @@ namespace KCSim
             Torqueable source = evaluationNode.SourceOfForce;
             Torqueable target = coupling.GetOther(source);
 
-            // If the net force is coming from the target itself, no need to back-propagate the force;
-            // just break early.
-            KeyValuePair<Torqueable, Force> sourceNetForce = source.GetNetForceAndSource();
-            if (sourceNetForce.Key == target)
+            KeyValuePair<Torqueable, Force> sourceNetForce;
+            if (partsGraph.IsEdgeStillPresent(coupling))
             {
-                return;
+                // If the net force is coming from the target itself, no need to back-propagate the force;
+                // just break early.
+                sourceNetForce = source.GetNetForceAndSource();
+                if (sourceNetForce.Key == target)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                // This coupling has been removed. Hard code the source net force to zero and let that get
+                // propagated to torqueables that were formerly connected to this coupling.
+                sourceNetForce = new KeyValuePair<Torqueable, Force>(target, Force.ZeroForce);
             }
 
             // Apply the force to the coupling.

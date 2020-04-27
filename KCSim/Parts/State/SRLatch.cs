@@ -12,6 +12,9 @@ namespace KCSim.Parts.State
         public readonly Axle SetInverse;
         public readonly Axle ResetInverse;
 
+        // Hold onto references for the subcomponents for debugging.
+        private readonly NandGate[] nandGates;
+
         public SRLatch(
             ICouplingService couplingService,
             IGateFactory gateFactory,
@@ -22,10 +25,10 @@ namespace KCSim.Parts.State
             ResetInverse = new Axle(name + "; reset inverse");
 
             // Create 2 NAND gates.
-            NandGate[] nandGates = new NandGate[2];
+            nandGates = new NandGate[2];
             for (int i = 0; i < 2; i++)
             {
-                var nandGate = gateFactory.CreateNewNandGate(name: "NAND gate " + i);
+                var nandGate = gateFactory.CreateNewNandGate(name: name + "; NAND gate " + i);
                 couplingService.CreateNewLockedCoupling(Power, nandGate.Power);
                 nandGates[i] = nandGate;
             }

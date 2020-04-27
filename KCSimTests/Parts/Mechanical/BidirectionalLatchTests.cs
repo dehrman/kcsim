@@ -74,5 +74,33 @@ namespace KCSimTests
             Assert.Equal(Force.ZeroForce, bidirectionalLatch.OutputAxleNegative.GetNetForce());
             Assert.Equal(Force.ZeroForce, bidirectionalLatch.OutputAxlePositive.GetNetForce());
         }
+
+        [Theory]
+        [InlineData(-1, 1)]
+        [InlineData(1, -1)]
+        public void TestThat_NewValuesAreLatchedIn(int oldValue, int newValue)
+        {
+            motor.Force = new Force(1);
+
+            // Latch in the initial value.
+            inputSwitch.Force = new Force(oldValue);
+            forceEvaluator.EvaluateForces();
+
+            // Latch in the new value.
+            inputSwitch.Force = new Force(newValue);
+            forceEvaluator.EvaluateForces();
+
+            if (newValue < 0)
+            {
+                Assert.Equal(new Force(newValue), bidirectionalLatch.OutputAxleNegative.GetNetForce());
+                Assert.Equal(new Force(0), bidirectionalLatch.OutputAxlePositive.GetNetForce());
+            }
+            else if (newValue < 0)
+            {
+                Assert.Equal(new Force(0), bidirectionalLatch.OutputAxleNegative.GetNetForce());
+                Assert.Equal(new Force(newValue), bidirectionalLatch.OutputAxlePositive.GetNetForce());
+            }
+
+        }
     }
 }

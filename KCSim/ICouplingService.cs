@@ -1,4 +1,5 @@
 ﻿using KCSim.Parts.Mechanical.Atomic;
+using KCSim.Parts.State;
 using KCSim.Physics;
 using KCSim.Physics.Couplings;
 
@@ -18,6 +19,6 @@ namespace KCSim
 
         Coupling CreateNewFreeFlowingCoupling(Torqueable input, Torqueable output, string name = "");
 
-        Coupling CreateNewInitialStateCoupling(Force initialForce, Torqueable output, string name = "");
+        Coupling CreateNewInitialStateCoupling(InitialState initialForce, Torqueable output, string name = "");
     }
 }

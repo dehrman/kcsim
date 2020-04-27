@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using KCSim.Parts.Mechanical.Atomic;
 using KCSim.Physics;
 using KCSim.Physics.Couplings;
 
 namespace KCSim.Parts.Mechanical
 {
-    public class Paddle : Torqueable
+    public class Paddle : Gear
     {
         public enum Position
         {
@@ -66,6 +67,11 @@ namespace KCSim.Parts.Mechanical
             }
             
             return true;
+        }
+
+        public override uint GetNumTeeth()
+        {
+            return 1;
         }
 
         private void ReinitializeTimer()

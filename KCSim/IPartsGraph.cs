@@ -14,6 +14,8 @@ namespace KCSim
 
         ISet<Coupling> GetCouplings(Torqueable node);
 
+        bool IsEdgeStillPresent(Coupling coupling);
+
         IEnumerable<KeyValuePair<Torqueable, Coupling>> GetLeafVertices();
     }
 }

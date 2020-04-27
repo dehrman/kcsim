@@ -1,5 +1,6 @@
 ﻿using System;
 using KCSim.Parts.Mechanical.Machines;
+using KCSim.Parts.State;
 
 namespace KCSim.Physics.Couplings
 {
@@ -9,11 +10,11 @@ namespace KCSim.Physics.Couplings
      */
     public class InitialStateCoupling : Coupling
     {
-        private readonly Force initialForce;
+        private readonly InitialState initialForce;
         private bool shouldApplyInitialForce;
 
         public InitialStateCoupling(
-            Force initialForce,
+            InitialState initialForce,
             Torqueable output,
             string name = "initial state coupling"
             ) : base(new ExternalSwitch(initialForce), output, name)

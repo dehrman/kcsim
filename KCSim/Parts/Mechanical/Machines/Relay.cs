@@ -18,7 +18,6 @@ namespace KCSim.Parts.Mechanical.Machines
         // functional properties of the part
         private readonly Direction inputDirection;
         private readonly Direction paddleWheelEnableDirection;
-        private readonly bool isInputPositiveDirection;
 
         // conditional couplings that are created and destroyed as the relay is enabled and disabled respectively
         private Coupling inputToConnectorCoupling;
@@ -133,9 +132,10 @@ namespace KCSim.Parts.Mechanical.Machines
 
             // The interaction between the paddle wheel and the paddle is at the core of the control mechanism and
             // requires special handling here, via a separate evaluator class.
-            couplingService.CreateNewBidirectionalOpposingCoupling(
+            couplingService.CreateNewOneWayCoupling(
                 input: controlPaddleWheel,
-                output: ArmPaddle);
+                output: ArmPaddle,
+                direction: paddleWheelEnableDirection.Opposite());
 
             // create fixed coupling for output
             couplingService.CreateNewLockedCoupling(

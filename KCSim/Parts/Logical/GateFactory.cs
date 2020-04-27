@@ -43,9 +43,9 @@ namespace KCSim.Parts.Logical
         /**
          * Requires one standard module
          */
-        public AndGate CreateNewAndGate(bool doMonitor = true)
+        public AndGate CreateNewAndGate(bool doMonitor = true, string name = "AND gate")
         {
-            var gate = new AndGate(couplingService, bidirectionalLatchFactory);
+            var gate = new AndGate(couplingService, bidirectionalLatchFactory, name);
             if (doMonitor)
             {
                 gateMonitor.RegisterGate(gate);
@@ -75,8 +75,8 @@ namespace KCSim.Parts.Logical
          */
         public NandGate CreateNewNandGate(bool doMonitor = true, string name = "NAND gate")
         {
-            var andGate = CreateNewAndGate(doMonitor: false);
-            var notGate = CreateNewNotGate(doMonitor: false);
+            var andGate = CreateNewAndGate(doMonitor: false, name: name + "; AND gate");
+            var notGate = CreateNewNotGate(doMonitor: false, name: name + "; AND gate");
             var gate = new NandGate(couplingService, andGate, notGate, name);
             if (doMonitor)
             {
