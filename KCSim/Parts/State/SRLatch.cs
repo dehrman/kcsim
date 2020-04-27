@@ -33,10 +33,10 @@ namespace KCSim.Parts.State
             // Wire up the NAND gates.
             couplingService.CreateNewLockedCoupling(SetInverse, nandGates[0].InputA);
             couplingService.CreateNewLockedCoupling(nandGates[1].Output, nandGates[0].InputB);
-            couplingService.CreateNewLockedCoupling(nandGates[0].Output, Output);
+            couplingService.CreateNewLockedCoupling(nandGates[0].Output, Q);
             couplingService.CreateNewLockedCoupling(nandGates[0].Output, nandGates[1].InputA);
             couplingService.CreateNewLockedCoupling(ResetInverse, nandGates[1].InputB);
-            couplingService.CreateNewLockedCoupling(nandGates[1].Output, OutputInverse);
+            couplingService.CreateNewLockedCoupling(nandGates[1].Output, QInverse);
         }
     }
 }

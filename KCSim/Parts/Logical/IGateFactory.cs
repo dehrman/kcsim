@@ -10,9 +10,9 @@ namespace KCSim.Parts.Logical
 
         OrGate CreateNewOrGate(bool doMonitor = true);
 
-        NotGate CreateNewNotGate(bool doMonitor = true);
+        NotGate CreateNewNotGate(bool doMonitor = true, string name = null);
 
-        NandGate CreateNewNandGate(bool doMonitor = true, string name = "");
+        NandGate CreateNewNandGate(bool doMonitor = true, string name = null);
 
         XorGate CreateNewXorGate(bool doMonitor = true);
 

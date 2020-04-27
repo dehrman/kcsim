@@ -7,8 +7,8 @@ namespace KCSim.Parts.State
 {
     public interface IStateFactory
     {
-        SRLatch CreateNewSRLatch();
+        SRLatch CreateNewSRLatch(string name = null);
 
-        GatedDLatch CreateNewGatedDLatch();
+        GatedDLatch CreateNewGatedDLatch(string name = null);
     }
 }

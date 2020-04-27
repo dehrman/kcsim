@@ -7,9 +7,10 @@ using KCSim.Parts.Mechanical.Atomic;
 namespace KCSim.Parts.Logical
 {
     public class MultiInputGate<T> : Gate
-        where T : Gate
+        where T : BinaryInputGate
     {
         public readonly Axle[] Inputs;
+        public readonly Axle Output;
 
         private readonly T[] gates;
         private readonly ICouplingService couplingService;
@@ -29,6 +30,9 @@ namespace KCSim.Parts.Logical
             Inputs = Enumerable.Range(0, numInputs)
                 .Select(i => new Axle(name + "; input " + i))
                 .ToArray();
+
+            // Create the output.
+            Output = new Axle(name + " output");
 
             ConnectGates();
         }

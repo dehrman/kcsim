@@ -7,33 +7,45 @@ namespace KCSim.Parts.State
 {
     public class DFlipFlop : StatefulGate
     {
-        public readonly Axle Enable;
+        public readonly Axle Clock;
+        public readonly Axle Data;
+
+        // Hold onto references to the subcomponents for debugging.
+        public readonly GatedDLatch[] Latches;
+        public readonly NotGate[] NotGates;
 
         public DFlipFlop(
             ICouplingService couplingService,
             IGateFactory gateFactory,
+            IStateFactory stateFactory,
             string name = "D flip-flop") : base(name)
         {
             // Create inputs unique to this stateful gate.
-            Enable = new Axle(name + "; enable");
+            Data = new Axle(name + "; data");
+            Clock = new Axle(name + "; clock");
 
-            // Create 4 NAND gates.
-            NandGate[] nandGates = Enumerable.Range(0, 4)
-                .Select(x => gateFactory.CreateNewNandGate()).ToArray();
+            // Create the gates.
+            Latches = new GatedDLatch[2];
+            NotGates = new NotGate[2];
+            for (int i = 0; i < 2; i++)
+            {
+                Latches[i] = stateFactory.CreateNewGatedDLatch(name: name + "; gated D latch " + i);
+                couplingService.CreateNewLockedCoupling(Power, Latches[i].Power);
+                NotGates[i] = gateFactory.CreateNewNotGate(name: name + "; NOT gate " + i);
+                couplingService.CreateNewLockedCoupling(NotGates[i].Output, Latches[i].Enable);
+            }
 
-            // Connect the power to the gates.
-            System.Array.ForEach(nandGates, gate => couplingService.CreateNewLockedCoupling(Power, gate.Power));
+            // Wire up the clock.
+            couplingService.CreateNewLockedCoupling(Clock, NotGates[0].Input);
+            couplingService.CreateNewLockedCoupling(NotGates[0].Output, NotGates[1].Input);
 
-            couplingService.CreateNewLockedCoupling(Data, nandGates[0].InputA);
-            couplingService.CreateNewLockedCoupling(Enable, nandGates[0].InputB);
-            couplingService.CreateNewLockedCoupling(Enable, nandGates[1].InputB);
-            couplingService.CreateNewLockedCoupling(nandGates[0].Output, nandGates[1].InputA);
-            couplingService.CreateNewLockedCoupling(nandGates[0].Output, nandGates[2].InputA);
-            couplingService.CreateNewLockedCoupling(nandGates[2].Output, nandGates[3].InputA);
-            couplingService.CreateNewLockedCoupling(nandGates[2].Output, Output);
-            couplingService.CreateNewLockedCoupling(nandGates[3].Output, OutputInverse);
-            couplingService.CreateNewLockedCoupling(nandGates[3].Output, nandGates[2].InputB);
-            couplingService.CreateNewLockedCoupling(nandGates[1].Output, nandGates[3].InputB);
+            // Wire up the data.
+            couplingService.CreateNewLockedCoupling(Data, Latches[0].Data);
+            couplingService.CreateNewLockedCoupling(Latches[0].Q, Latches[1].Data);
+
+            // Wire up the output.
+            couplingService.CreateNewLockedCoupling(Latches[1].Q, Q);
+            couplingService.CreateNewLockedCoupling(Latches[1].QInverse, QInverse);
         }
     }
 }

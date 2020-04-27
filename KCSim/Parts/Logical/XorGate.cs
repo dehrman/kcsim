@@ -1,13 +1,15 @@
-﻿namespace KCSim.Parts.Logical
+﻿using KCSim.Parts.Mechanical.Atomic;
+
+namespace KCSim.Parts.Logical
 {
-    public class XorGate : Gate
+    public class XorGate : BinaryInputGate
     {
         public XorGate(
             ICouplingService couplingService,
             NandGate nandGate,
             AndGate andGate,
-            OrGate orGate)
-            : base("XOR gate")
+            OrGate orGate,
+            string name = "XOR gate") : base(name)
         {
             // An XOR gate can be constructed from a NAND gate, an AND gate, and an OR gate.
             couplingService.CreateNewLockedCoupling(InputA, nandGate.InputA);

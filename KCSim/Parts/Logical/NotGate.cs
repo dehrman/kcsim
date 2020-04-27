@@ -7,9 +7,17 @@ namespace KCSim.Parts.Logical
 {
     public class NotGate : Gate
     {
+        public readonly Axle Input;
+        public readonly Axle Output;
+
         public NotGate(
-            ICouplingService couplingService) : base("NOT gate")
+            ICouplingService couplingService,
+            string name = "NOT gate") : base(name)
         {
+            // Create the I/O.
+            Input = new Axle(name + " input");
+            Output = new Axle(name + " output");
+
             Gear inputGear = new MediumGear();
             couplingService.CreateNewLockedCoupling(Input, inputGear);
             Gear outputGear = new MediumGear();
@@ -19,7 +27,7 @@ namespace KCSim.Parts.Logical
 
         public override bool RequiresPower()
         {
-            return true;
+            return false;
         }
     }
 }

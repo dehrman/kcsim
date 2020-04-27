@@ -3,7 +3,7 @@ using KCSim.Parts.Mechanical.Atomic;
 
 namespace KCSim.Parts.Logical
 {
-    public class NandGate : Gate
+    public class NandGate : BinaryInputGate
     {
         public NandGate(
             ICouplingService couplingService,

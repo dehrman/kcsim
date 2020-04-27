@@ -30,9 +30,9 @@ namespace KCSim.Parts.Logical
         /**
          * Trivial construction—no standard module required
          */
-        public NotGate CreateNewNotGate(bool doMonitor = true)
+        public NotGate CreateNewNotGate(bool doMonitor = true, string name = "")
         {
-            var gate = new NotGate(couplingService);
+            var gate = new NotGate(couplingService, name);
             if (doMonitor)
             {
                 gateMonitor.RegisterGate(gate);

@@ -41,8 +41,8 @@ namespace KCSimTests.Parts.State
             ResetInverse.Force = new Force(resetInverse);
             forceEvaluator.EvaluateForces();
 
-            TestUtil.AssertDirectionsEqual(new Force(expectedOutput), latch.Output.GetNetForce());
-            TestUtil.AssertDirectionsEqual(new Force(expectedOutput * -1), latch.OutputInverse.GetNetForce());
+            TestUtil.AssertDirectionsEqual(new Force(expectedOutput), latch.Q.GetNetForce());
+            TestUtil.AssertDirectionsEqual(new Force(expectedOutput * -1), latch.QInverse.GetNetForce());
         }
 
         [Fact]
@@ -54,8 +54,10 @@ namespace KCSimTests.Parts.State
             SetInverse.Force = new Force(1);
             forceEvaluator.EvaluateForces();
 
-            TestUtil.AssertDirectionsEqual(new Force(1), latch.Output.GetNetForce());
-            TestUtil.AssertDirectionsEqual(new Force(-1), latch.OutputInverse.GetNetForce());
+            TestUtil.AssertDirectionsEqual(new Force(1), latch.Q.GetNetForce());
+            TestUtil.AssertDirectionsEqual(new Force(-1), latch.QInverse.GetNetForce());
         }
+
+        public void TestThat_LatchHolds
     }
 }

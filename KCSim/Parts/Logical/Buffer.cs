@@ -11,10 +11,18 @@ namespace KCSim.Parts.Logical
      */
     public class Buffer : Gate
     {
+        public readonly Axle Input;
+        public readonly Axle Output;
+
         public Buffer(
             ICouplingService couplingService,
-            IBidirectionalLatchFactory bidirectionalLatchFactory) : base("buffer")
+            IBidirectionalLatchFactory bidirectionalLatchFactory,
+            string name = "buffer") : base(name)
         {
+            // Create the I/O.
+            Input = new Axle(name + " input");
+            Output = new Axle(name + " output");
+
             var latch = bidirectionalLatchFactory.CreateNew();
             couplingService.CreateNewLockedCoupling(Input, latch.Input);
             couplingService.CreateNewLockedCoupling(Power, latch.Power);

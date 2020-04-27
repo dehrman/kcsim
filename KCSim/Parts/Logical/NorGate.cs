@@ -3,18 +3,14 @@ using KCSim.Parts.Mechanical.Atomic;
 
 namespace KCSim.Parts.Logical
 {
-    public class NorGate : Gate
+    public class NorGate : BinaryInputGate
     {
-        public readonly Axle Power = new Axle("NOR gate power");
-        public readonly Axle InputA = new Axle("NOR gate inputA");
-        public readonly Axle InputB = new Axle("NOR gate inputB");
-        public readonly Axle Output = new Axle("NOR gate output");
-
         public NorGate(
             ICouplingService couplingService,
             OrGate orGate,
-            NotGate notGate)
-            : base("NOR gate")
+            NotGate notGate,
+            string name = "NOR gate")
+            : base(name)
         {
             // An NOR gate can be constructed from an OR gate and a NOT gate.
             couplingService.CreateNewLockedCoupling(InputA, orGate.InputA);

@@ -61,7 +61,7 @@ namespace KCSimTests.Parts.Logical
             Func<bool, bool, bool> binaryPredicate,
             int numInputs,
             Func<MultiInputGate<T>> gateProvider)
-            where T : Gate
+            where T : BinaryInputGate
         {
             var initialStateCouplings = new Coupling[numInputs];
 

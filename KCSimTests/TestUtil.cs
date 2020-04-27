@@ -162,28 +162,35 @@ namespace KCSimTests
             return ToLevel(new Force(forceToChange), new Force(desiredLevel));
         }
 
-        public static void AssertDirectionsEqual(Force force1, Force force2)
+        public static void AssertDirectionsEqual(Force expected, Force actual)
         {
-            if (force1.Equals(force2))
+            // If the force is the special InitialState, in most cases (unless force2 equals initialState),
+            // that should not count as being equal.
+            if (Math.Abs(new InitialState().Velocity).Equals(Math.Abs(expected.Velocity)))
             {
-                Assert.Equal(force1, force2);
+                Assert.Equal(Math.Abs(new InitialState().Velocity), Math.Abs(actual.Velocity));
+            }
+
+            if (expected.Equals(actual))
+            {
+                Assert.Equal(expected, actual);
                 return;
             }
 
-            if (force1.Equals(Force.ZeroForce) || force2.Equals(Force.ZeroForce))
+            if (expected.Equals(Force.ZeroForce) || actual.Equals(Force.ZeroForce))
             {
                 Assert.True(false);
                 return;
             }
 
-            var releveledForce1 = ToLevel(force1, force2);
-            Assert.Equal(releveledForce1, force2);
+            var releveledForce1 = ToLevel(expected, actual);
+            Assert.Equal(releveledForce1, actual);
         }
 
         public void InitializeState(StatefulGate gate)
         {
-            couplingService.CreateNewInitialStateCoupling(new InitialState(), gate.Output);
-            couplingService.CreateNewInitialStateCoupling(new Force(new InitialState().Velocity * -1), gate.OutputInverse);
+            couplingService.CreateNewInitialStateCoupling(new InitialState(), gate.Q);
+            couplingService.CreateNewInitialStateCoupling(new Force(new InitialState().Velocity * -1), gate.QInverse);
         }
 
         public static IDictionary<bool[], bool> GetTruthTable(int numInputs, Func<bool[], bool> predicate)

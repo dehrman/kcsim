@@ -1,17 +1,19 @@
 ﻿using KCSim.Parts.Mechanical;
+using KCSim.Parts.Mechanical.Atomic;
 
 namespace KCSim.Parts.Logical
 {
-    public class AndGate : Gate
+    public class AndGate : BinaryInputGate
     {
         public AndGate(
             ICouplingService couplingService,
-            IBidirectionalLatchFactory bidirectionalLatchFactory)
-            : base("AND gate")
+            IBidirectionalLatchFactory bidirectionalLatchFactory,
+            string name = "AND gate")
+            : base(name)
         {
             // Create a bidirectional latch for each input.
-            BidirectionalLatch inputLatchA = bidirectionalLatchFactory.CreateNew("AND gate inputLatchA");
-            BidirectionalLatch inputLatchB = bidirectionalLatchFactory.CreateNew("AND gate inputLatchB");
+            BidirectionalLatch inputLatchA = bidirectionalLatchFactory.CreateNew(name + "; inputLatchA");
+            BidirectionalLatch inputLatchB = bidirectionalLatchFactory.CreateNew(name + "; inputLatchB");
 
             // Connect the inputs to the latches.
             couplingService.CreateNewLockedCoupling(InputA, inputLatchA.Input);
@@ -28,7 +30,7 @@ namespace KCSim.Parts.Logical
             couplingService.CreateNewLockedCoupling(
                 inputLatchA.OutputAxleNegative,
                 Output,
-                "coupling from inputLatchA's negative output to the AND gate's output");
+                "coupling from inputLatchA's negative output to " + name + "'s output");
 
             // Now, assuming inputA is true, and inputLatchB is powered, we'll want the output to be powered
             // by either the positive or the negative output from inputLatchB. While this may seem like a
@@ -39,11 +41,11 @@ namespace KCSim.Parts.Logical
             couplingService.CreateNewLockedCoupling(
                 inputLatchB.OutputAxleNegative,
                 Output,
-                "coupling from inputLatchB's negative output to the AND gate's output");
+                "coupling from inputLatchB's negative output to " + name + "'s output");
             couplingService.CreateNewLockedCoupling(
                 inputLatchB.OutputAxlePositive,
                 Output,
-                "coupling from inputLatchB's positive output the the AND gate's output");
+                "coupling from inputLatchB's positive output the " + name + "'s output");
         }
 
         public override bool RequiresPower()

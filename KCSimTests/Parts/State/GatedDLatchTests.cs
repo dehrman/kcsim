@@ -42,10 +42,10 @@ namespace KCSimTests.Parts.State
 
             forceEvaluator.EvaluateForces();
 
-            var latchedValue = latch.Output.GetNetForce().Velocity;
+            var latchedValue = latch.Q.GetNetForce().Velocity;
             Assert.Equal(new Force(valueToLatch), new Force(latchedValue));
             Assert.Equal(valueToLatch, latchedValue);
-            Assert.Equal(new Force(valueToLatch * -1), latch.OutputInverse.GetNetForce());
+            Assert.Equal(new Force(valueToLatch * -1), latch.QInverse.GetNetForce());
         }
 
         [Theory]
@@ -65,8 +65,31 @@ namespace KCSimTests.Parts.State
             forceEvaluator.EvaluateForces();
 
             // We should expect to still see the initially latched-in value on the output wire.
-            Assert.Equal(new Force(initialValue), latch.Output.GetNetForce());
-            Assert.Equal(new Force(initialValue * -1), latch.OutputInverse.GetNetForce());
+            Assert.Equal(new Force(initialValue), latch.Q.GetNetForce());
+            Assert.Equal(new Force(initialValue * -1), latch.QInverse.GetNetForce());
+        }
+
+        [Theory]
+        [InlineData(1, -1)]
+        [InlineData(-1, 1)]
+        public void TestThat_LatchCanResetAndStoreNewValue(int oldValue, int newValue)
+        {
+            // Latch in the initial value.
+            DataIn.Force = new Force(oldValue);
+            WriteEnable.Force = new Force(1);
+            forceEvaluator.EvaluateForces();
+
+            // Now disable the write enable and set the data input to the new value.
+            WriteEnable.Force = new Force(-1);
+            DataIn.Force = new Force(newValue);
+            forceEvaluator.EvaluateForces();
+
+            // Now enable the write enable.
+            WriteEnable.Force = new Force(1);
+            forceEvaluator.EvaluateForces();
+
+            // We should expect to see that the old value was overwritten, and the new value is present.
+            TestUtil.AssertDirectionsEqual(new Force(newValue), latch.Q.GetNetForce());
         }
     }
 }

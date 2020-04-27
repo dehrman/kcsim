@@ -19,14 +19,19 @@ namespace KCSim.Parts.State
         }
 
 
-        public SRLatch CreateNewSRLatch()
+        public SRLatch CreateNewSRLatch(string name = "gated D latch")
         {
-            return stateMonitor.RegisterGate(new SRLatch(couplingService, gateFactory));
+            return stateMonitor.RegisterGate(new SRLatch(couplingService, gateFactory, name));
         }
 
-        public GatedDLatch CreateNewGatedDLatch()
+        public GatedDLatch CreateNewGatedDLatch(string name = "gated D latch")
         {
-            return stateMonitor.RegisterGate(new GatedDLatch(couplingService, gateFactory));
+            var gate = new GatedDLatch(
+                couplingService: couplingService,
+                stateFactory: this,
+                gateFactory: gateFactory,
+                name: name);
+            return stateMonitor.RegisterGate(gate);
         }
     }
 }

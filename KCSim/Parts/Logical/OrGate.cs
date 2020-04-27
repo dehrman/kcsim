@@ -3,15 +3,15 @@ using KCSim.Parts.Mechanical.Atomic;
 
 namespace KCSim.Parts.Logical
 {
-    public class OrGate : Gate
+    public class OrGate : BinaryInputGate
     {
         public OrGate(
             ICouplingService couplingService,
             AndGate andGate,
             NotGate notGateInputA,
             NotGate notGateInputB,
-            NotGate notGateOutput)
-            : base("OR gate")
+            NotGate notGateOutput,
+            string name = "OR gate") : base (name)
         {
             // An OR gate can be constructed by simply inverting the inputs to an AND gate
             // and inverting its output.
