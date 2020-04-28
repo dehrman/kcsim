@@ -5,6 +5,9 @@ namespace KCSim.Parts.Logical
 {
     public class AndGate : BinaryInputGate
     {
+        private readonly BidirectionalLatch inputLatchA;
+        private readonly BidirectionalLatch inputLatchB;
+
         public AndGate(
             ICouplingService couplingService,
             IBidirectionalLatchFactory bidirectionalLatchFactory,
@@ -12,8 +15,8 @@ namespace KCSim.Parts.Logical
             : base(name)
         {
             // Create a bidirectional latch for each input.
-            BidirectionalLatch inputLatchA = bidirectionalLatchFactory.CreateNew(name + "; inputLatchA");
-            BidirectionalLatch inputLatchB = bidirectionalLatchFactory.CreateNew(name + "; inputLatchB");
+            inputLatchA = bidirectionalLatchFactory.CreateNew(name + "; inputLatchA");
+            inputLatchB = bidirectionalLatchFactory.CreateNew(name + "; inputLatchB");
 
             // Connect the inputs to the latches.
             couplingService.CreateNewLockedCoupling(InputA, inputLatchA.Input);

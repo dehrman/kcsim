@@ -19,6 +19,6 @@ namespace KCSim.Physics.Couplings
 
         Coupling CreateNewFreeFlowingCoupling(Torqueable input, Torqueable output, string name = "");
 
-        Coupling CreateNewInitialStateCoupling(InitialState initialForce, Torqueable output, string name = "");
+        InitialStateCoupling CreateNewInitialStateCoupling(InitialState initialForce, Torqueable output, string name = "");
     }
 }

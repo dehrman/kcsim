@@ -22,14 +22,14 @@ namespace KCSim
 
         public void AddToFrontOfEvaluationQueue(Coupling coupling)
         {
-            evaluationQueue.Add(new EvaluationNode(coupling.Input, coupling));
-            evaluationQueue.Add(new EvaluationNode(coupling.Output, coupling));
+            AddToFrontOfEvaluationQueue(new EvaluationNode(coupling.Input, coupling));
+            AddToFrontOfEvaluationQueue(new EvaluationNode(coupling.Output, coupling));
         }
 
-        public void AddToEvaluationQueue(Coupling coupling)
+        public void AddToBackOfEvaluationQueue(Coupling coupling)
         {
-            AddToEvaluationQueue(new EvaluationNode(coupling.Input, coupling));
-            AddToEvaluationQueue(new EvaluationNode(coupling.Output, coupling));
+            AddToBackOfEvaluationQueue(new EvaluationNode(coupling.Input, coupling));
+            AddToBackOfEvaluationQueue(new EvaluationNode(coupling.Output, coupling));
         }
 
         public void EvaluateForces()
@@ -40,7 +40,7 @@ namespace KCSim
             // Add leaf nodes first.
             foreach (KeyValuePair<Torqueable, Coupling> leaf in partsGraph.GetLeafVertices())
             {
-                AddToEvaluationQueue(new EvaluationNode(leaf.Key, leaf.Value));
+                AddToBackOfEvaluationQueue(new EvaluationNode(leaf.Key, leaf.Value));
             }
 
             // Evaluate and propagate forces via breadth-first search.
@@ -87,8 +87,20 @@ namespace KCSim
                 sourceNetForce = source.GetNetForceAndSource();
                 if (sourceNetForce.Key == target)
                 {
-                    return;
+                    if (sourceNetForce.Value.Equals(Force.ZeroForce))
+                    {
+                        if (target.GetNetForce().Equals(Force.ZeroForce))
+                        {
+                            return;
+                        }
+                        // else continue to evaluate.
+                    }
+                    else
+                    {
+                        return;
+                    }
                 }
+                // else continue to evaluate
             }
             else
             {
@@ -111,40 +123,57 @@ namespace KCSim
             }
 
             // Get adjacent couplings, and add them to the queue.
+            var forceFromSource = targetForce;
             foreach (var adjacentCoupling in partsGraph.GetCouplings(target))
             {
-                if (adjacentCoupling != coupling)
+                if (!adjacentCoupling.Equals(coupling))
                 {
-                    if (typeof(BiPaddleCoupling).Equals(adjacentCoupling.GetType()))
+                    if (RequiresFrontOfQueueProcessing(adjacentCoupling, forceFromSource))
                     {
-                        // Because this adjacent coupling represents a physical rod rotating about a fulcrum,
-                        // the forces should be propagated to the other end of the rod (the other paddle) first.
-                        AddToFrontOfEvaluationQueue(target, adjacentCoupling);
-                    }
-                    else if (targetForce.Equals(Force.ZeroForce))
-                    {
-                        // Always propagate the removal of force first.
                         AddToFrontOfEvaluationQueue(target, adjacentCoupling);
                     }
                     else
                     {
-                        AddToEvaluationQueue(adjacentCoupling);
+                        AddToBackOfEvaluationQueue(adjacentCoupling);
                     }
                 }
             }
         }
 
-        private void AddToEvaluationQueue(EvaluationNode evaluationNode)
+        private static bool RequiresFrontOfQueueProcessing(Coupling coupling, Force forceFromSource)
         {
-            evaluationQueue.Add(evaluationNode);
+            if (typeof(BiPaddleCoupling).Equals(coupling.GetType()))
+            {
+                // Because this adjacent coupling represents a physical rod rotating about a fulcrum,
+                // the forces should be propagated to the other end of the rod (the other paddle) first.
+                return true;
+            }
+            
+            if (forceFromSource.Equals(Force.ZeroForce))
+            {
+                // Always propagate the removal of force first.
+                return true;
+            }
+
+            return false;
         }
 
         private void AddToFrontOfEvaluationQueue(Torqueable sourceOfChangeInForce, Coupling coupling)
         {
             // Add the source of change in force last since this is a queue (adding last means it will get picked up first).
             Torqueable target = coupling.GetOther(sourceOfChangeInForce);
-            evaluationQueue.Add(new EvaluationNode(target, coupling));
-            evaluationQueue.Add(new EvaluationNode(sourceOfChangeInForce, coupling));
+            AddToFrontOfEvaluationQueue(new EvaluationNode(target, coupling));
+            AddToFrontOfEvaluationQueue(new EvaluationNode(sourceOfChangeInForce, coupling));
+        }
+
+        private void AddToBackOfEvaluationQueue(EvaluationNode evaluationNode)
+        {
+            evaluationQueue.Add(evaluationNode);
+        }
+
+        private void AddToFrontOfEvaluationQueue(EvaluationNode evaluationNode)
+        {
+            evaluationQueue.Insert(0, evaluationNode);
         }
 
         private class EvaluationNode

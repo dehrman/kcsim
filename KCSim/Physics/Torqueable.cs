@@ -84,6 +84,7 @@ namespace KCSim.Physics
             IList<Force> preExistingForcesNotFromThisSource =
                 forces.Where(kvp => !kvp.Key.Equals(source))
                     .Where(kvp => !kvp.Value.Equals(Force.ZeroForce))
+                    .OrderByDescending(kvp => kvp.Value)
                     .Select(kvp => kvp.Value)
                     .ToList();
 

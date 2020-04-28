@@ -52,14 +52,10 @@ namespace KCSimTests.Parts.Logical
             forceEvaluator.EvaluateForces();
             Assert.Equal(new Force(-1), andGate.Output.GetNetForce());
 
-            inputBSwitch.Force = new Force(0);
-            forceEvaluator.EvaluateForces();
             inputBSwitch.Force = new Force(1);
             forceEvaluator.EvaluateForces();
             Assert.Equal(new Force(1), andGate.Output.GetNetForce());
 
-            inputBSwitch.Force = new Force(0);
-            forceEvaluator.EvaluateForces();
             inputBSwitch.Force = new Force(-1);
             forceEvaluator.EvaluateForces();
             Assert.Equal(new Force(-1), andGate.Output.GetNetForce());

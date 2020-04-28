@@ -63,6 +63,9 @@ namespace KCSimTests.Parts.State
         [InlineData(1, -1)]
         public void TestThat_LatchSeesNewValue(int oldValue, int newValue)
         {
+            // Get the system into a good initial state.
+            forceEvaluator.EvaluateForces();
+
             // Latch in the initial value.
             SetInverse.Force = new Force(oldValue * -1);
             ResetInverse.Force = new Force(oldValue);

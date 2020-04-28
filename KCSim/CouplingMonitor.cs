@@ -55,7 +55,7 @@ namespace KCSim
         public void RegisterCoupling(Coupling coupling)
         {
             partsGraph.AddVerticesAndEdge(coupling);
-            forceEvaluator.AddToEvaluationQueue(coupling);
+            forceEvaluator.AddToBackOfEvaluationQueue(coupling);
             MonitorForceChanges(coupling.Input);
             MonitorForceChanges(coupling.Output);
 
