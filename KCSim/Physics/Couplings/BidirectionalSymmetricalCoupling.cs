@@ -5,7 +5,7 @@ using KCSim.Physics;
 
 namespace KCSim.Physics.Couplings
 {
-    class BidirectionalSymmetricalCoupling : Coupling
+    public class BidirectionalSymmetricalCoupling : Coupling
     {
         private Force inputToOutputForce;
         private Force outputToInputForce;

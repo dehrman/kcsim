@@ -43,7 +43,7 @@ namespace KCSim.Parts.Mechanical.Machines
 
             // Because the control axle has an opposing coupling with the control paddle, we record the sign of the control paddle
             // as the inverse of that of the control axle.
-            paddleWheelEnableDirection = enableDirection.Opposite();
+            paddleWheelEnableDirection = enableDirection;
 
             InputAxle = new Axle(name: name + "; input axle");
             InputGear = new SmallGear(name + "; input gear");
@@ -66,12 +66,12 @@ namespace KCSim.Parts.Mechanical.Machines
                 DisengageRelay();
                 return;
             }
-            if (paddleWheelEnableDirection == Direction.Positive && position != Position.Positive)
+            if (paddleWheelEnableDirection == Direction.Positive && position == Position.Positive)
             {
                 DisengageRelay();
                 return;
             }
-            if (paddleWheelEnableDirection == Direction.Negative && position != Position.Negative)
+            if (paddleWheelEnableDirection == Direction.Negative && position == Position.Negative)
             {
                 DisengageRelay();
                 return;
@@ -86,10 +86,12 @@ namespace KCSim.Parts.Mechanical.Machines
             if (inputToConnectorCoupling != null)
             {
                 couplingService.RemoveCoupling(inputToConnectorCoupling);
+                inputToConnectorCoupling = null;
             }
             if (connectorToOutputCoupling != null)
             {
                 couplingService.RemoveCoupling(connectorToOutputCoupling);
+                connectorToOutputCoupling = null;
             }
         }
 
@@ -135,7 +137,7 @@ namespace KCSim.Parts.Mechanical.Machines
             couplingService.CreateNewOneWayCoupling(
                 input: controlPaddleWheel,
                 output: ArmPaddle,
-                direction: paddleWheelEnableDirection.Opposite());
+                direction: paddleWheelEnableDirection);
 
             // create fixed coupling for output
             couplingService.CreateNewLockedCoupling(

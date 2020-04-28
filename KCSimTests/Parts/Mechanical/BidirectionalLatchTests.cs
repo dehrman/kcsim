@@ -101,6 +101,21 @@ namespace KCSimTests
                 Assert.Equal(new Force(newValue), bidirectionalLatch.OutputAxlePositive.GetNetForce());
             }
 
+            // And now back to old values.
+            inputSwitch.Force = new Force(oldValue);
+            forceEvaluator.EvaluateForces();
+
+            if (oldValue < 0)
+            {
+                Assert.Equal(new Force(oldValue), bidirectionalLatch.OutputAxleNegative.GetNetForce());
+                Assert.Equal(new Force(0), bidirectionalLatch.OutputAxlePositive.GetNetForce());
+            }
+            else if (oldValue < 0)
+            {
+                Assert.Equal(new Force(0), bidirectionalLatch.OutputAxleNegative.GetNetForce());
+                Assert.Equal(new Force(newValue), bidirectionalLatch.OutputAxlePositive.GetNetForce());
+            }
+
         }
     }
 }

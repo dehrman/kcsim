@@ -8,9 +8,19 @@ namespace KCSim.Physics.Couplings
 {
     public class CouplingFactory : ICouplingFactory
     {
+        public BiPaddleCoupling CreateNewBiPaddleCoupling(Torqueable input, Torqueable output, string name = "")
+        {
+            return new BiPaddleCoupling(input, output, name);
+        }
+
         public Coupling CreateNewBidirectionalOpposingCoupling(Torqueable input, Torqueable output, string name = "")
         {
             return new BidirectionalOpposingCoupling(input, output, 1.0, name);
+        }
+
+        public Coupling CreateNewOneWayPaddleCoupling(Gear input, Gear output, Direction direction, string name = "")
+        {
+            return new OneWayPaddleCoupling(input, output, GetInputToOutputRatio(input, output), direction, name);
         }
 
         public Coupling CreateNewFreeFlowingCoupling(Torqueable input, Torqueable output, string name = "")

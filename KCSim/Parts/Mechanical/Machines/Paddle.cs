@@ -60,9 +60,14 @@ namespace KCSim.Parts.Mechanical
             }
 
             // If the direction changed, reset the motion timer.
-            if (!MotionMath.IsSameDirection(oldForce.Velocity, GetNetForce().Velocity))
+            Force newForce = GetNetForce();
+            if (!MotionMath.IsSameDirection(oldForce.Velocity, newForce.Velocity))
             {
-                currentAngle = IntermediateRestingPlaceDegrees;
+                double forceDelta = oldForce.Velocity - newForce.Velocity;
+                double motionSign = forceDelta / Math.Abs(forceDelta); // will be either +1 or -1.
+                currentAngle += motionSign / currentAngle;
+                NotifyPaddlePositionChanged();
+
                 ReinitializeTimer();
             }
             
@@ -85,6 +90,7 @@ namespace KCSim.Parts.Mechanical
             }
 
             double degreesToStoppingPlace = GetDestination(velocity) - currentAngle;
+
             motionTimer.Start(degreesToStoppingPlace, velocity, OnMotionTimerCompletion);
         }
 
@@ -125,14 +131,12 @@ namespace KCSim.Parts.Mechanical
         {
             switch (currentAngle)
             {
-                case IntermediateRestingPlaceDegrees:
-                    return Position.Intermediate;
                 case NegativeRestingPlaceDegrees:
                     return Position.Negative;
                 case PositiveRestingPlaceDegrees:
                     return Position.Positive;
                 default:
-                    throw new InvalidOperationException("GetPosition invoked during non-determinate paddle state");
+                    return Position.Intermediate;
             }
         }
     }

@@ -64,9 +64,14 @@ namespace KCSimTests
             Mock<IMotionTimer> mockMotionTimer = new Mock<IMotionTimer>();
 
             // Set up the motion timer such that the delegate is invoked as soon as the timer is started.
-            mockMotionTimer.Setup(x => x.Start(It.IsAny<double>(), It.IsAny<double>(), It.IsAny<IMotionTimer.OnTimerCompletionDelegate>()))
+            var forceEvaluator = GetSingletonForceEvaluator();
+            mockMotionTimer.Setup(x =>x.Start(
+                    It.IsAny<double>(),
+                    It.IsAny<double>(),
+                    It.IsAny<IMotionTimer.OnTimerCompletionDelegate>()))
                 .Callback<double, double, IMotionTimer.OnTimerCompletionDelegate>(
-                    (d, v, onTimerCompletionDelegate) => onTimerCompletionDelegate.Invoke(v));
+                    (d, v, onTimerCompletionDelegate) =>
+                        forceEvaluator.OnAllForcesEvaluated(() => onTimerCompletionDelegate.Invoke(v)));
 
             return mockMotionTimer;
         }
@@ -79,7 +84,7 @@ namespace KCSimTests
         public Mock<IPaddleFactory> GetMockPaddleFactory(Mock<IMotionTimer> mockMotionTimer)
         {
             Mock<IPaddleFactory> mockPaddleFactory = new Mock<IPaddleFactory>();
-            Paddle paddle = new Paddle(mockMotionTimer.Object, Paddle.Position.Positive, "test paddle");
+            Paddle paddle = new Paddle(mockMotionTimer.Object, Paddle.Position.Intermediate, "test paddle");
             mockPaddleFactory.Setup(x => x.CreateNew(It.IsAny<Paddle.Position>(), It.IsAny<string>())).Returns(paddle);
             return mockPaddleFactory;
         }

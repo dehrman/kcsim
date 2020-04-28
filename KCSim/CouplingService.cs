@@ -1,4 +1,5 @@
-﻿using KCSim.Parts.Mechanical.Atomic;
+﻿using KCSim.Parts.Mechanical;
+using KCSim.Parts.Mechanical.Atomic;
 using KCSim.Parts.State;
 using KCSim.Physics;
 using KCSim.Physics.Couplings;
@@ -40,9 +41,23 @@ namespace KCSim
             return coupling;
         }
 
+        public BiPaddleCoupling CreateNewBiPaddleCoupling(Paddle paddle1, Paddle paddle2, string name = "")
+        {
+            BiPaddleCoupling coupling = couplingFactory.CreateNewBiPaddleCoupling(paddle1, paddle2, name);
+            couplingMonitor.RegisterCoupling(coupling);
+            return coupling;
+        }
+
         public Coupling CreateNewOneWayCoupling(Gear input, Gear output, Direction direction, string name = "")
         {
             Coupling coupling = couplingFactory.CreateNewOneWayCoupling(input, output, direction, name);
+            couplingMonitor.RegisterCoupling(coupling);
+            return coupling;
+        }
+
+        public Coupling CreateNewOneWayPaddleCoupling(Gear input, Gear output, Direction direction, string name = "")
+        {
+            Coupling coupling = couplingFactory.CreateNewOneWayPaddleCoupling(input, output, direction, name);
             couplingMonitor.RegisterCoupling(coupling);
             return coupling;
         }

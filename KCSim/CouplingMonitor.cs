@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using KCSim.Parts.Logical;
 using KCSim.Physics;
 using KCSim.Physics.Couplings;
+using static KCSim.Physics.Torqueable;
 using static KCSim.ICouplingMonitor;
 
 namespace KCSim
@@ -53,6 +56,8 @@ namespace KCSim
         {
             partsGraph.AddVerticesAndEdge(coupling);
             forceEvaluator.AddToEvaluationQueue(coupling);
+            MonitorForceChanges(coupling.Input);
+            MonitorForceChanges(coupling.Output);
 
             if (!onCoupledToInputDelegates.ContainsKey(coupling.Output))
             {
@@ -72,7 +77,7 @@ namespace KCSim
         public void RemoveCoupling(Coupling coupling)
         {
             partsGraph.RemoveEdge(coupling);
-            forceEvaluator.AddToEvaluationQueue(coupling);
+            forceEvaluator.AddToFrontOfEvaluationQueue(coupling);
 
             if (!onCouplingRemovedDelegates.ContainsKey(coupling))
             {
@@ -95,5 +100,14 @@ namespace KCSim
             return couplings != null && couplings.Count > 0;
         }
 
+        private void MonitorForceChanges(Torqueable torqueable)
+        {
+            torqueable.OnForceChange += GetOnForceChangeDelegate(torqueable);
+        }
+
+        private OnForceChangeDelegate GetOnForceChangeDelegate(Torqueable torqueable)
+        {
+            return (oldForce, newForce) => { }; // System.Diagnostics.Debug.WriteLine(torqueable + " changed from " + oldForce + " to " + newForce);
+        }
     }
 }

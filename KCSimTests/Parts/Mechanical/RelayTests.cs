@@ -138,7 +138,7 @@ namespace KCSimTests
                 paddleFactory: testUtil.GetMockPaddleFactory().Object,
                 enableDirection: enableForce < 0 ? Direction.Negative : Direction.Positive,
                 inputDirection: latchedInputForce < 0 ? Direction.Negative : Direction.Positive,
-                name: "relay");
+                name: (enableForce < 0 ? "negative" : "positive") + " relay");
 
             couplingService.CreateNewLockedCoupling(enable, relay.Enable);
             couplingService.CreateNewLockedCoupling(input, relay.InputAxle);

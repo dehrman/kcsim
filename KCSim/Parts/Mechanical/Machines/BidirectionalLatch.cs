@@ -78,7 +78,7 @@ namespace KCSim.Parts.Mechanical
             // Although the control force is only ever coming from one of the two paddles at a time
             // (thanks to the aforementioned diodes), physical irregularities (e.g. paddle wheels ending up
             // in unfortunate positions) can result in destructive opposing forces.
-            couplingService.CreateNewLockedCoupling(
+            couplingService.CreateNewBiPaddleCoupling(
                 positiveRelay.ArmPaddle,
                 negativeRelay.ArmPaddle,
                 name: "coupling between the paddles of the positive and negative relays");

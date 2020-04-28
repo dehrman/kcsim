@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using KCSim.Physics;
 using KCSim.Physics.Couplings;
 using static KCSim.ICouplingMonitor;
@@ -9,12 +10,20 @@ namespace KCSim
     public class ForceEvaluator
     {
         private readonly IPartsGraph partsGraph;
-        private readonly Queue<EvaluationNode> evaluationQueue;
+        private readonly List<EvaluationNode> evaluationQueue;
+        private readonly Queue<Action> callbackQueue;
 
         public ForceEvaluator(IPartsGraph partsGraph)
         {
             this.partsGraph = partsGraph;
-            evaluationQueue = new Queue<EvaluationNode>();
+            evaluationQueue = new List<EvaluationNode>();
+            callbackQueue = new Queue<Action>();
+        }
+
+        public void AddToFrontOfEvaluationQueue(Coupling coupling)
+        {
+            evaluationQueue.Add(new EvaluationNode(coupling.Input, coupling));
+            evaluationQueue.Add(new EvaluationNode(coupling.Output, coupling));
         }
 
         public void AddToEvaluationQueue(Coupling coupling)
@@ -34,14 +43,34 @@ namespace KCSim
                 AddToEvaluationQueue(new EvaluationNode(leaf.Key, leaf.Value));
             }
 
+            // Evaluate and propagate forces via breadth-first search.
             while (evaluationQueue.Count > 0)
             {
                 // Get the next coupling to evaluate.
-                EvaluationNode currentNode = evaluationQueue.Dequeue();
+                EvaluationNode currentNode = evaluationQueue[0];
+                evaluationQueue.RemoveAt(0);
 
                 // Visit the current node.
                 VisitNode(currentNode);
             }
+
+            // Invoke any callbacks that were added to the callback queue 
+            while (callbackQueue.Count > 0)
+            {
+                callbackQueue.Dequeue()?.Invoke();
+            }
+
+            // If the callbacks added to the queue, evaluate the forces again.
+            // Otherwise, we've reached stability and can exit from this function.
+            if (evaluationQueue.Count > 0)
+            {
+                EvaluateForces();
+            }
+        }
+
+        public void OnAllForcesEvaluated(Action action)
+        {
+            callbackQueue.Enqueue(action);
         }
 
         private void VisitNode(EvaluationNode evaluationNode)
@@ -86,14 +115,36 @@ namespace KCSim
             {
                 if (adjacentCoupling != coupling)
                 {
-                    AddToEvaluationQueue(adjacentCoupling);
+                    if (typeof(BiPaddleCoupling).Equals(adjacentCoupling.GetType()))
+                    {
+                        // Because this adjacent coupling represents a physical rod rotating about a fulcrum,
+                        // the forces should be propagated to the other end of the rod (the other paddle) first.
+                        AddToFrontOfEvaluationQueue(target, adjacentCoupling);
+                    }
+                    else if (targetForce.Equals(Force.ZeroForce))
+                    {
+                        // Always propagate the removal of force first.
+                        AddToFrontOfEvaluationQueue(target, adjacentCoupling);
+                    }
+                    else
+                    {
+                        AddToEvaluationQueue(adjacentCoupling);
+                    }
                 }
             }
         }
 
         private void AddToEvaluationQueue(EvaluationNode evaluationNode)
         {
-            evaluationQueue.Enqueue(evaluationNode);
+            evaluationQueue.Add(evaluationNode);
+        }
+
+        private void AddToFrontOfEvaluationQueue(Torqueable sourceOfChangeInForce, Coupling coupling)
+        {
+            // Add the source of change in force last since this is a queue (adding last means it will get picked up first).
+            Torqueable target = coupling.GetOther(sourceOfChangeInForce);
+            evaluationQueue.Add(new EvaluationNode(target, coupling));
+            evaluationQueue.Add(new EvaluationNode(sourceOfChangeInForce, coupling));
         }
 
         private class EvaluationNode
