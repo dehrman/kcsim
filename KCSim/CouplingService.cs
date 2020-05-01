@@ -55,9 +55,9 @@ namespace KCSim
             return coupling;
         }
 
-        public Coupling CreateNewOneWayPaddleCoupling(Gear input, Gear output, Direction direction, string name = "")
+        public OneWayPaddleCoupling CreateNewOneWayPaddleCoupling(PaddleWheel paddleWheel, Paddle paddle, Direction direction, string name = "")
         {
-            Coupling coupling = couplingFactory.CreateNewOneWayPaddleCoupling(input, output, direction, name);
+            OneWayPaddleCoupling coupling = couplingFactory.CreateNewOneWayPaddleCoupling(paddleWheel, paddle, direction, name);
             couplingMonitor.RegisterCoupling(coupling);
             return coupling;
         }
@@ -76,7 +76,7 @@ namespace KCSim
             return coupling;
         }
 
-        public InitialStateCoupling CreateNewInitialStateCoupling(InitialState initialForce, Torqueable output, string name = "")
+        public InitialStateCoupling CreateNewInitialStateCoupling(Parts.State.InitialState initialForce, Torqueable output, string name = "")
         {
             InitialStateCoupling coupling = couplingFactory.CreateNewInitialStateCoupling(initialForce, output, name);
             couplingMonitor.RegisterCoupling(coupling);

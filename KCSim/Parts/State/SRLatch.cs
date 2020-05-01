@@ -9,11 +9,13 @@ namespace KCSim.Parts.State
 {
     public class SRLatch : StatefulGate
     {
-        public readonly Axle SetInverse;
-        public readonly Axle ResetInverse;
+        public readonly Axle Set;
+        public readonly Axle Reset;
 
         // Hold onto references for the subcomponents for debugging.
-        private readonly NandGate[] nandGates;
+        private readonly OrGate orGate;
+        private readonly AndGate andGate;
+        private readonly NotGate notGate;
 
         public SRLatch(
             ICouplingService couplingService,
@@ -21,25 +23,23 @@ namespace KCSim.Parts.State
             string name = "SR latch") : base(name)
         {
             // Create inputs unique to this stateful gate.
-            SetInverse = new Axle(name + "; set inverse");
-            ResetInverse = new Axle(name + "; reset inverse");
+            Set = new Axle(name + "; set inverse");
+            Reset = new Axle(name + "; reset inverse");
 
-            // Create 2 NAND gates.
-            nandGates = new NandGate[2];
-            for (int i = 0; i < 2; i++)
-            {
-                var nandGate = gateFactory.CreateNewNandGate(name: name + "; NAND gate " + i);
-                couplingService.CreateNewLockedCoupling(Power, nandGate.Power);
-                nandGates[i] = nandGate;
-            }
+            // Create the gates.
+            orGate = gateFactory.CreateNewOrGate(name: name + "; OR gate");
+            couplingService.CreateNewLockedCoupling(Power, orGate.Power);
+            andGate = gateFactory.CreateNewAndGate(name: name + "; AND gate");
+            couplingService.CreateNewLockedCoupling(Power, andGate.Power);
+            notGate = gateFactory.CreateNewNotGate(name: name + "; NOT gate");
 
-            // Wire up the NAND gates.
-            couplingService.CreateNewLockedCoupling(SetInverse, nandGates[0].InputA);
-            couplingService.CreateNewLockedCoupling(nandGates[1].Output, nandGates[0].InputB);
-            couplingService.CreateNewLockedCoupling(nandGates[0].Output, Q);
-            couplingService.CreateNewLockedCoupling(nandGates[0].Output, nandGates[1].InputA);
-            couplingService.CreateNewLockedCoupling(ResetInverse, nandGates[1].InputB);
-            couplingService.CreateNewLockedCoupling(nandGates[1].Output, QInverse);
+            // Wire up the gates.
+            couplingService.CreateNewLockedCoupling(Set, orGate.InputB);
+            couplingService.CreateNewLockedCoupling(Reset, notGate.Input);
+            couplingService.CreateNewLockedCoupling(orGate.Output, andGate.InputA);
+            couplingService.CreateNewLockedCoupling(notGate.Output, andGate.InputB);
+            couplingService.CreateNewLockedCoupling(andGate.Output, orGate.InputA);
+            couplingService.CreateNewLockedCoupling(andGate.Output, Q);
         }
     }
 }

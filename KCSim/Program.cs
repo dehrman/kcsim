@@ -1,6 +1,9 @@
 ﻿using System;
+using KCSim.Parts.Logical;
 using KCSim.Parts.Mechanical;
+using KCSim.Parts.State;
 using KCSim.Physics;
+using KCSim.Physics.Couplings;
 using SimpleInjector;
 
 namespace KCSim
@@ -13,7 +16,7 @@ namespace KCSim
         {
             Simulator simulator = container.GetInstance<Simulator>();
 
-            simulator.runDiodeTest();
+            simulator.RunSimulation();
         }
 
         static Program()
@@ -23,8 +26,20 @@ namespace KCSim
 
             // 2. Configure the container (register)
             container.Register<IMotionTimer, MotionTimer>();
-            container.Register<ForceEvaluator>();
-            container.Register<Simulator>();
+            container.RegisterSingleton<MotionTimerFactory>();
+            container.RegisterSingleton<IPaddleFactory, PaddleFactory>();
+            container.RegisterSingleton<IPartsGraph, PartsGraph>();
+            container.RegisterSingleton<IGateMonitor, GateMonitor>();
+            container.RegisterSingleton<ICouplingMonitor, CouplingMonitor>();
+            container.RegisterSingleton<IBidirectionalLatchFactory, BidirectionalLatchFactory>();
+            container.RegisterSingleton<ICouplingService, CouplingService>();
+            container.RegisterSingleton<ICouplingFactory, CouplingFactory>();
+            container.RegisterSingleton<IRelayFactory, RelayFactory>();
+            container.RegisterSingleton<IStateFactory, StateFactory>();
+            container.RegisterSingleton<IGateFactory, GateFactory>();
+            container.RegisterSingleton<IStateMonitor, StateMonitor>();
+            container.RegisterSingleton<ForceEvaluator>();
+            container.RegisterSingleton<Simulator>();
 
             // 3. Verify your configuration
             container.Verify();

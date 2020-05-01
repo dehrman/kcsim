@@ -135,7 +135,7 @@ namespace KCSimTests
             var couplingService = testUtil.GetSingletonCouplingService();
             var relay = new Relay(
                 couplingService: couplingService,
-                paddleFactory: testUtil.GetMockPaddleFactory().Object,
+                paddleFactory: testUtil.GetPaddleFactory(),
                 enableDirection: enableForce < 0 ? Direction.Negative : Direction.Positive,
                 inputDirection: latchedInputForce < 0 ? Direction.Negative : Direction.Positive,
                 name: (enableForce < 0 ? "negative" : "positive") + " relay");

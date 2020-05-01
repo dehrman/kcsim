@@ -5,6 +5,10 @@ namespace KCSim.Parts.Logical
 {
     public class NandGate : BinaryInputGate
     {
+        // Keep a reference to the gates for debugging.
+        private readonly AndGate andGate;
+        private readonly NotGate notGate;
+
         public NandGate(
             ICouplingService couplingService,
             AndGate andGate,
@@ -12,6 +16,9 @@ namespace KCSim.Parts.Logical
             string name = "NAND gate")
             : base(name)
         {
+            this.andGate = andGate;
+            this.notGate = notGate;
+
             // An NAND gate can be constructed by simply inverting the output of an AND gate.
             couplingService.CreateNewLockedCoupling(InputA, andGate.InputA, name + "; input A to AND gate input A");
             couplingService.CreateNewLockedCoupling(InputB, andGate.InputB, name + "; input B to AND gate input B");

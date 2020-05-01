@@ -8,17 +8,17 @@ namespace KCSim.Parts.Logical
     {
         AndGate CreateNewAndGate(bool doMonitor = true, string name = null);
 
-        OrGate CreateNewOrGate(bool doMonitor = true);
+        OrGate CreateNewOrGate(bool doMonitor = true, string name = null);
 
         NotGate CreateNewNotGate(bool doMonitor = true, string name = null);
 
         NandGate CreateNewNandGate(bool doMonitor = true, string name = null);
 
-        XorGate CreateNewXorGate(bool doMonitor = true);
+        XorGate CreateNewXorGate(bool doMonitor = true, string name = null);
 
-        NorGate CreateNewNorGate(bool doMonitor = true);
+        NorGate CreateNewNorGate(bool doMonitor = true, string name = null);
 
-        Buffer CreateNewBuffer(bool doMonitor = true);
+        Buffer CreateNewBuffer(bool doMonitor = true, string name = null);
 
         MultiInputGate<AndGate> CreateNewMultiInputAndGate(int numInputs, bool doMonitor = true);
 

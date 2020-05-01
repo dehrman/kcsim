@@ -3,9 +3,9 @@ namespace KCSim.Parts.Mechanical
 {
     public class PaddleFactory : IPaddleFactory
     {
-        private readonly IMotionTimer motionTimerFactory;
+        private readonly MotionTimerFactory motionTimerFactory;
 
-        public PaddleFactory(IMotionTimer motionTimerFactory)
+        public PaddleFactory(MotionTimerFactory motionTimerFactory)
         {
             this.motionTimerFactory = motionTimerFactory;
         }
@@ -14,8 +14,9 @@ namespace KCSim.Parts.Mechanical
             Paddle.Position initialPosition = Paddle.Position.Positive,
             string name = "default paddle name")
         {
+            IMotionTimer motionTimer = motionTimerFactory.CreateNew();
             return new Paddle(
-                motionTimer: motionTimerFactory,
+                motionTimer: motionTimer,
                 initialPosition: initialPosition,
                 name: name);
         }

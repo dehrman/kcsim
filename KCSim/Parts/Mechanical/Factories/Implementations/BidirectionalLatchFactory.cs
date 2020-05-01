@@ -1,11 +1,11 @@
 ﻿namespace KCSim.Parts.Mechanical
 {
-    class BidirectionalLatchFactory : IBidirectionalLatchFactory
+    public class BidirectionalLatchFactory : IBidirectionalLatchFactory
     {
         private readonly ICouplingService couplingService;
         private readonly IRelayFactory relayFactory;
 
-        BidirectionalLatchFactory(
+        public BidirectionalLatchFactory(
             ICouplingService couplingService,
             IRelayFactory relayFactory)
         {

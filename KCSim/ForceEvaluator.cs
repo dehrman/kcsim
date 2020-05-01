@@ -34,14 +34,41 @@ namespace KCSim
 
         public void EvaluateForces()
         {
-            // This method uses a breadth-first search to evaluate and propogate forces throughout
-            // the machine. In this algorithm, we represent a <vertex, edge> pair as a "node."
-
             // Add leaf nodes first.
             foreach (KeyValuePair<Torqueable, Coupling> leaf in partsGraph.GetLeafVertices())
             {
                 AddToBackOfEvaluationQueue(new EvaluationNode(leaf.Key, leaf.Value));
             }
+
+            while (evaluationQueue.Count > 0)
+            {
+                VisitAllNodesInQueue();
+
+                // Invoke any callbacks that were added to the callback queue.
+                // Since these callbacks may also add to the evaluation queue, we'll need to go
+                // back and check once more that the evaluation queue is empty before returning.
+                while (callbackQueue.Count > 0)
+                {
+                    callbackQueue.Dequeue()?.Invoke();
+                }
+            }
+        }
+
+        public void OnAllForcesEvaluated(Action action)
+        {
+            callbackQueue.Enqueue(action);
+        }
+
+        private void VisitAllNodesInQueue()
+        {
+            // This method uses a mixed breadth-first and depth-first search to evaluate and
+            // propagate forces throughout the machine.
+            //
+            // In this algorithm, we represent a <vertex, edge> pair as a "node."
+            //
+            // The primary algorithm is breadth-first; however, some special cases will result
+            // in new nodes getting priority, at which point they will get added to the FRONT
+            // of the queue rather than the back.
 
             // Evaluate and propagate forces via breadth-first search.
             while (evaluationQueue.Count > 0)
@@ -53,24 +80,6 @@ namespace KCSim
                 // Visit the current node.
                 VisitNode(currentNode);
             }
-
-            // Invoke any callbacks that were added to the callback queue 
-            while (callbackQueue.Count > 0)
-            {
-                callbackQueue.Dequeue()?.Invoke();
-            }
-
-            // If the callbacks added to the queue, evaluate the forces again.
-            // Otherwise, we've reached stability and can exit from this function.
-            if (evaluationQueue.Count > 0)
-            {
-                EvaluateForces();
-            }
-        }
-
-        public void OnAllForcesEvaluated(Action action)
-        {
-            callbackQueue.Enqueue(action);
         }
 
         private void VisitNode(EvaluationNode evaluationNode)
@@ -79,28 +88,17 @@ namespace KCSim
             Torqueable source = evaluationNode.SourceOfForce;
             Torqueable target = coupling.GetOther(source);
 
-            KeyValuePair<Torqueable, Force> sourceNetForce;
+            if (target.name.StartsWith("SR latch; NAND gate 1; AND gate; inputLatchB; negative relay control diode"))
+            {
+                System.Diagnostics.Debug.WriteLine("Hey!");
+            }
+
+            KeyValuePair <Torqueable, Force> sourceNetForce;
             if (partsGraph.IsEdgeStillPresent(coupling))
             {
                 // If the net force is coming from the target itself, no need to back-propagate the force;
                 // just break early.
                 sourceNetForce = source.GetNetForceAndSource();
-                if (sourceNetForce.Key == target)
-                {
-                    if (sourceNetForce.Value.Equals(Force.ZeroForce))
-                    {
-                        if (target.GetNetForce().Equals(Force.ZeroForce))
-                        {
-                            return;
-                        }
-                        // else continue to evaluate.
-                    }
-                    else
-                    {
-                        return;
-                    }
-                }
-                // else continue to evaluate
             }
             else
             {
@@ -112,10 +110,22 @@ namespace KCSim
             // Apply the force to the coupling.
             Force targetForce = coupling.ReceiveForce(source, sourceNetForce.Value);
 
+            // Before proceeding, we need to check to make sure we're not back-propagating a force that
+            // originated with the target.
+            //
+            // The only condition in which we would want to continue propagating this force is if the
+            // force no longer equals the net force coming from the target. Otherwise, we should break
+            // early.
+            if (sourceNetForce.Key == target
+                && targetForce.Equals(target.GetNetForce()))
+            {
+                return;
+            }
+
             // Apply the force to the target.
             bool didTargetNetForceChange = target.UpdateForce(source, targetForce);
 
-            // If the net force on the target did not change, no need to back-propagate the force;
+            // If the net force on the target did not change, no need to propagate the force;
             // just break early.
             if (!didTargetNetForceChange)
             {
@@ -123,12 +133,11 @@ namespace KCSim
             }
 
             // Get adjacent couplings, and add them to the queue.
-            var forceFromSource = targetForce;
             foreach (var adjacentCoupling in partsGraph.GetCouplings(target))
             {
                 if (!adjacentCoupling.Equals(coupling))
                 {
-                    if (RequiresFrontOfQueueProcessing(adjacentCoupling, forceFromSource))
+                    if (RequiresFrontOfQueueProcessing(adjacentCoupling, targetForce))
                     {
                         AddToFrontOfEvaluationQueue(target, adjacentCoupling);
                     }
@@ -168,11 +177,19 @@ namespace KCSim
 
         private void AddToBackOfEvaluationQueue(EvaluationNode evaluationNode)
         {
+            if (evaluationQueue.Contains(evaluationNode))
+            {
+                return;
+            }
             evaluationQueue.Add(evaluationNode);
         }
 
         private void AddToFrontOfEvaluationQueue(EvaluationNode evaluationNode)
         {
+            if (evaluationQueue.Contains(evaluationNode))
+            {
+                evaluationQueue.Remove(evaluationNode);
+            }
             evaluationQueue.Insert(0, evaluationNode);
         }
 

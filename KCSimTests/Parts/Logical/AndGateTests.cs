@@ -60,5 +60,26 @@ namespace KCSimTests.Parts.Logical
             forceEvaluator.EvaluateForces();
             Assert.Equal(new Force(-1), andGate.Output.GetNetForce());
         }
+
+        [Theory]
+        [InlineData(-1, -1, -1)]
+        [InlineData(-1, 1, -1)]
+        [InlineData(1, -1, -1)]
+        [InlineData(1, 1, 1)]
+        public void TestThat_InputsAreUnpowered_OutputsRemainTheSame(int inputA, int inputB, int expectedOutput)
+        {
+            inputASwitch.Force = new Force(inputA);
+            inputBSwitch.Force = new Force(inputB);
+            forceEvaluator.EvaluateForces();
+            TestUtil.AssertDirectionsEqual(new Force(expectedOutput), andGate.Output.GetNetForce());
+
+            inputBSwitch.Force = Force.ZeroForce;
+            forceEvaluator.EvaluateForces();
+            Assert.Equal(new Force(expectedOutput), andGate.Output.GetNetForce());
+
+            inputASwitch.Force = Force.ZeroForce;
+            forceEvaluator.EvaluateForces();
+            Assert.Equal(new Force(expectedOutput), andGate.Output.GetNetForce());
+        }
     }
 }

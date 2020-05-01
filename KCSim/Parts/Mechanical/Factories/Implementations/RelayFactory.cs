@@ -3,7 +3,7 @@ using KCSim.Physics;
 
 namespace KCSim.Parts.Mechanical
 {
-    class RelayFactory : IRelayFactory
+    public class RelayFactory : IRelayFactory
     {
         private readonly ICouplingService couplingService;
         private readonly IPaddleFactory paddleFactory;
@@ -16,14 +16,19 @@ namespace KCSim.Parts.Mechanical
             this.paddleFactory = paddleFactory;
         }
 
-        public Relay CreateNew(Direction enableDirection, Direction inputDirection, string name = "")
+        public Relay CreateNew(
+            Direction enableDirection,
+            Direction inputDirection,
+            Relay.InitialState initialState = Relay.InitialState.Disabled,
+            string name = "")
         {
             return new Relay(
-                couplingService: couplingService,
-                paddleFactory: paddleFactory,
-                enableDirection: enableDirection,
-                inputDirection: enableDirection,
-                name: name);
+                couplingService,
+                paddleFactory,
+                enableDirection,
+                inputDirection,
+                initialState,
+                name);
         }
     }
 }

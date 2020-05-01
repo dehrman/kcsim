@@ -30,7 +30,7 @@ namespace KCSim.Parts.Logical
         /**
          * Trivial construction—no standard module required
          */
-        public NotGate CreateNewNotGate(bool doMonitor = true, string name = "")
+        public NotGate CreateNewNotGate(bool doMonitor = true, string name = "NOT gate")
         {
             var gate = new NotGate(couplingService, name);
             if (doMonitor)
@@ -56,13 +56,13 @@ namespace KCSim.Parts.Logical
         /**
          * Requires one standard module
          */
-        public OrGate CreateNewOrGate(bool doMonitor = true)
+        public OrGate CreateNewOrGate(bool doMonitor = true, string name = "OR gate")
         {
-            var andGate = CreateNewAndGate(doMonitor: false);
-            var notGateInputA = CreateNewNotGate(doMonitor: false);
-            var notGateInputB = CreateNewNotGate(doMonitor: false);
-            var notGateOutput = CreateNewNotGate(doMonitor: false);
-            var gate = new OrGate(couplingService, andGate, notGateInputA, notGateInputB, notGateOutput);
+            var andGate = CreateNewAndGate(doMonitor: false, name: name + "; AND gate");
+            var notGateInputA = CreateNewNotGate(doMonitor: false, name: name + "; NOT gate input A");
+            var notGateInputB = CreateNewNotGate(doMonitor: false, name: name + "; NOT gate input B");
+            var notGateOutput = CreateNewNotGate(doMonitor: false, name: name + "; NOT gate output");
+            var gate = new OrGate(couplingService, andGate, notGateInputA, notGateInputB, notGateOutput, name);
             if (doMonitor)
             {
                 gateMonitor.RegisterGate(gate);
@@ -88,12 +88,12 @@ namespace KCSim.Parts.Logical
         /**
          * Requires three standard modules
          */
-        public XorGate CreateNewXorGate(bool doMonitor = true)
+        public XorGate CreateNewXorGate(bool doMonitor = true, string name = "XOR gate")
         {
             var nandGate = CreateNewNandGate(doMonitor: false);
             var andGate = CreateNewAndGate(doMonitor: false);
             var orGate = CreateNewOrGate(doMonitor: false);
-            var gate = new XorGate(couplingService, nandGate, andGate, orGate);
+            var gate = new XorGate(couplingService, nandGate, andGate, orGate, name);
             if (doMonitor)
             {
                 gateMonitor.RegisterGate(gate);
@@ -101,11 +101,11 @@ namespace KCSim.Parts.Logical
             return gate;
         }
 
-        public NorGate CreateNewNorGate(bool doMonitor = true)
+        public NorGate CreateNewNorGate(bool doMonitor = true, string name = "NOR gate")
         {
             var orGate = CreateNewOrGate(doMonitor: false);
             var notGate = CreateNewNotGate(doMonitor: false);
-            var gate = new NorGate(couplingService, orGate, notGate);
+            var gate = new NorGate(couplingService, orGate, notGate, name);
             if (doMonitor)
             {
                 gateMonitor.RegisterGate(gate);
@@ -113,9 +113,9 @@ namespace KCSim.Parts.Logical
             return gate;
         }
 
-        public Buffer CreateNewBuffer(bool doMonitor = true)
+        public Buffer CreateNewBuffer(bool doMonitor = true, string name = "buffer")
         {
-            var gate = new Buffer(couplingService, bidirectionalLatchFactory);
+            var gate = new Buffer(couplingService, bidirectionalLatchFactory, name);
             if (doMonitor)
             {
                 gateMonitor.RegisterGate(gate);

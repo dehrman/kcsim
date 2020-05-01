@@ -1,68 +1,53 @@
 ﻿using System;
+using KCSim.Parts.Logical;
 using KCSim.Parts.Mechanical;
 using KCSim.Parts.Mechanical.Atomic;
+using KCSim.Parts.Mechanical.Machines;
+using KCSim.Parts.State;
 using KCSim.Physics;
 
 namespace KCSim
 {
     public class Simulator
     {
-        Diode diode;
-        Axle inputAxle;
-        Axle outputAxle;
+        private readonly IStateFactory stateFactory;
+        private readonly IGateFactory gateFactory;
+        private readonly ICouplingService couplingService;
+        private readonly ForceEvaluator forceEvaluator;
 
-        public Simulator()
+        public Simulator(
+            IStateFactory stateFactory,
+            IGateFactory gateFactory,
+            ICouplingService couplingService,
+            ForceEvaluator forceEvaluator
+            )
         {
-            /*
-            diode = new Diode(isPositiveDirection: true);
-
-            inputAxle = diode.InputAxle;
-            outputAxle = diode.OutputAxle;
-            */
+            this.stateFactory = stateFactory;
+            this.gateFactory = gateFactory;
+            this.couplingService = couplingService;
+            this.forceEvaluator = forceEvaluator;
         }
 
-        public void runDiodeTest()
+        public void RunSimulation()
         {
-            Console.WriteLine("Running diode test...");
-            printState();
-            /*
-            Console.WriteLine("Adding positive slow force on input axle...");
-            inputAxle.AddForce(new Force(1));
-            printState();
+            ExternalSwitch Power = new ExternalSwitch(new Force(1), "power");
+            ExternalSwitch Set = new ExternalSwitch(new Force(-1), "set");
+            ExternalSwitch Reset = new ExternalSwitch(new Force(1), "reset");
 
-            Console.WriteLine("Adding positive fast force on input axle...");
-            Force doubleForce = new Force(2);
-            inputAxle.AddForce(doubleForce);
-            printState();
+            SRLatch srLatch = stateFactory.CreateNewSRLatch();
+            couplingService.CreateNewLockedCoupling(Power, srLatch.Power);
+            couplingService.CreateNewLockedCoupling(Set, srLatch.Set);
+            couplingService.CreateNewLockedCoupling(Reset, srLatch.Reset);
 
-            Console.WriteLine("Removing positive fast force on input axle...");
-            inputAxle.RemoveForce(doubleForce);
-            printState();
+            AndGate andGate = gateFactory.CreateNewAndGate();
+            couplingService.CreateNewLockedCoupling(Power, andGate.Power);
+            couplingService.CreateNewLockedCoupling(Set, andGate.InputA);
+            couplingService.CreateNewLockedCoupling(Reset, andGate.InputB);
 
-            Console.WriteLine("Adding negative slow force on input axle");
-            inputAxle.RemoveAllForces();
-            inputAxle.AddForce(new Force(-1));
-            printState();
+            forceEvaluator.EvaluateForces();
 
-            Console.WriteLine("Removing all forces on input axle...");
-            inputAxle.RemoveAllForces();
-            printState();
-
-            Console.WriteLine("Adding positive fast force on output axle...");
-            outputAxle.AddForce(doubleForce);
-            Console.WriteLine("Adding positive slow force on input axle");
-            inputAxle.AddForce(new Force(1));
-            printState();
-
-            Console.WriteLine("Removing positive fast force on output axle...");
-            outputAxle.RemoveForce(doubleForce);
-            printState();
-            */
-        }
-
-        private void printState()
-        {
-            Console.WriteLine("Condition: Input={" + inputAxle + "}; Output={" + outputAxle + "}");
+            Console.WriteLine("AND output: " + andGate.Output);
+            Console.WriteLine("SR latch output: " + srLatch.Q);
         }
     }
 }

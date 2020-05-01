@@ -16,7 +16,7 @@ namespace KCSim.Physics
         }
 
         private readonly Dictionary<Torqueable, Force> forces;
-        private readonly string name;
+        public readonly string name;
 
         public Torqueable(string name = "")
         {

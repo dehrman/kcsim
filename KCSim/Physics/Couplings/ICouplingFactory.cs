@@ -1,4 +1,5 @@
-﻿using KCSim.Parts.Mechanical.Atomic;
+﻿using KCSim.Parts.Mechanical;
+using KCSim.Parts.Mechanical.Atomic;
 using KCSim.Parts.State;
 
 namespace KCSim.Physics.Couplings
@@ -15,10 +16,10 @@ namespace KCSim.Physics.Couplings
 
         Coupling CreateNewOneWayCoupling(Gear input, Gear output, Direction direction, string name = "");
 
-        Coupling CreateNewOneWayPaddleCoupling(Gear input, Gear output, Direction direction, string name = "");
+        OneWayPaddleCoupling CreateNewOneWayPaddleCoupling(PaddleWheel paddleWheel, Paddle paddle, Direction direction, string name = "");
 
         Coupling CreateNewFreeFlowingCoupling(Torqueable input, Torqueable output, string name = "");
 
-        InitialStateCoupling CreateNewInitialStateCoupling(InitialState initialForce, Torqueable output, string name = "");
+        InitialStateCoupling CreateNewInitialStateCoupling(Parts.State.InitialState initialForce, Torqueable output, string name = "");
     }
 }

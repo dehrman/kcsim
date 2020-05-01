@@ -44,12 +44,11 @@ namespace KCSim.Parts.State
             couplingService.CreateNewLockedCoupling(Enable, nandGates[1].InputB);
 
             // Wire up the inputs to the SR latch.
-            couplingService.CreateNewLockedCoupling(nandGates[0].Output, srLatch.SetInverse);
-            couplingService.CreateNewLockedCoupling(nandGates[1].Output, srLatch.ResetInverse);
+            couplingService.CreateNewLockedCoupling(nandGates[0].Output, srLatch.Set);
+            couplingService.CreateNewLockedCoupling(nandGates[1].Output, srLatch.Reset);
 
             // Wire up the output.
             couplingService.CreateNewLockedCoupling(srLatch.Q, Q);
-            couplingService.CreateNewLockedCoupling(srLatch.QInverse, QInverse);
         }
     }
 }

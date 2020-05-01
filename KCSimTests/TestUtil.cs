@@ -20,6 +20,7 @@ namespace KCSimTests
         private IGateMonitor gateMonitor = null;
         private IStateMonitor stateMonitor = null;
         private IPartsGraph partsGraph = null;
+        private MotionTimerFactory motionTimerFactory = null;
         private ForceEvaluator forceEvaluator = null;
 
         public ForceEvaluator GetSingletonForceEvaluator()
@@ -29,6 +30,16 @@ namespace KCSimTests
                 forceEvaluator = new ForceEvaluator(GetSingletonPartsGraph());
             }
             return forceEvaluator;
+        }
+
+        public MotionTimerFactory GetSingletonMotionTimerFactory()
+        {
+            if (motionTimerFactory == null)
+            {
+                motionTimerFactory = new MotionTimerFactory();
+            }
+
+            return motionTimerFactory;
         }
 
         public IPartsGraph GetSingletonPartsGraph()
@@ -76,36 +87,20 @@ namespace KCSimTests
             return mockMotionTimer;
         }
 
-        public Mock<IPaddleFactory> GetMockPaddleFactory()
+        public IPaddleFactory GetPaddleFactory()
         {
-            return GetMockPaddleFactory(GetMockMotionTimer());
+            IPaddleFactory paddleFactory = new PaddleFactory(GetSingletonMotionTimerFactory());
+            return paddleFactory;
         }
 
-        public Mock<IPaddleFactory> GetMockPaddleFactory(Mock<IMotionTimer> mockMotionTimer)
+        public IRelayFactory GetRelayFactory()
         {
-            Mock<IPaddleFactory> mockPaddleFactory = new Mock<IPaddleFactory>();
-            Paddle paddle = new Paddle(mockMotionTimer.Object, Paddle.Position.Intermediate, "test paddle");
-            mockPaddleFactory.Setup(x => x.CreateNew(It.IsAny<Paddle.Position>(), It.IsAny<string>())).Returns(paddle);
-            return mockPaddleFactory;
+            return new RelayFactory(GetSingletonCouplingService(), GetPaddleFactory());
         }
 
-        public Mock<IRelayFactory> GetMockRelayFactory()
+        public IBidirectionalLatchFactory GetBidirectionalLatchFactory()
         {
-            Mock<IRelayFactory> mockRelayFactory = new Mock<IRelayFactory>();
-            Mock<IPaddleFactory> mockPaddleFactory = GetMockPaddleFactory();
-            mockRelayFactory.Setup(x => x.CreateNew(It.IsAny<Direction>(), It.IsAny<Direction>(), It.IsAny<string>()))
-                .Returns<Direction, Direction, string>((enableDirection, inputDirection, name) =>
-                    new Relay(GetSingletonCouplingService(), mockPaddleFactory.Object, enableDirection, inputDirection, name)
-                );
-            return mockRelayFactory;
-        }
-
-        public Mock<IBidirectionalLatchFactory> GetMockBidirectionalLatchFactory()
-        {
-            Mock<IBidirectionalLatchFactory> mockBidirectionalLatchFactory = new Mock<IBidirectionalLatchFactory>();
-            mockBidirectionalLatchFactory.Setup(x => x.CreateNew(It.IsAny<string>()))
-                .Returns<string>((name) => new BidirectionalLatch(GetSingletonCouplingService(), GetMockRelayFactory().Object, name: name));
-            return mockBidirectionalLatchFactory;
+            return new BidirectionalLatchFactory(GetSingletonCouplingService(), GetRelayFactory());
         }
 
         public IGateMonitor GetSingletonGateMonitor()
@@ -130,7 +125,7 @@ namespace KCSimTests
         {
             return new GateFactory(
                 couplingService: GetSingletonCouplingService(),
-                bidirectionalLatchFactory: GetMockBidirectionalLatchFactory().Object,
+                bidirectionalLatchFactory: GetBidirectionalLatchFactory(),
                 gateMonitor: GetSingletonGateMonitor());
         }
 
@@ -171,9 +166,9 @@ namespace KCSimTests
         {
             // If the force is the special InitialState, in most cases (unless force2 equals initialState),
             // that should not count as being equal.
-            if (Math.Abs(new InitialState().Velocity).Equals(Math.Abs(expected.Velocity)))
+            if (Math.Abs(new KCSim.Parts.State.InitialState().Velocity).Equals(Math.Abs(expected.Velocity)))
             {
-                Assert.Equal(Math.Abs(new InitialState().Velocity), Math.Abs(actual.Velocity));
+                Assert.Equal(Math.Abs(new KCSim.Parts.State.InitialState().Velocity), Math.Abs(actual.Velocity));
             }
 
             if (expected.Equals(actual))
@@ -194,8 +189,7 @@ namespace KCSimTests
 
         public void InitializeState(StatefulGate gate)
         {
-            couplingService.CreateNewInitialStateCoupling(new InitialState(), gate.Q);
-            couplingService.CreateNewInitialStateCoupling(new InitialState(new InitialState().Velocity * -1), gate.QInverse);
+            couplingService.CreateNewInitialStateCoupling(new KCSim.Parts.State.InitialState(), gate.Q);
         }
 
         public static IDictionary<bool[], bool> GetTruthTable(int numInputs, Func<bool[], bool> predicate)

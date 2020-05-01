@@ -23,8 +23,9 @@ namespace KCSim.Parts.Mechanical
         private const double NegativeRestingPlaceDegrees = IntermediateRestingPlaceDegrees - 45;
         private const double PositiveRestingPlaceDegrees = IntermediateRestingPlaceDegrees + 45;
         
-        private double currentAngle;
         private readonly IMotionTimer motionTimer;
+        private readonly Position initialPosition;
+        private double currentAngle;
 
         public Paddle(
             IMotionTimer motionTimer,
@@ -32,6 +33,9 @@ namespace KCSim.Parts.Mechanical
             string name = "")
             : base (name)
         {
+            this.motionTimer = motionTimer;
+            this.initialPosition = initialPosition;
+            
             if (initialPosition == Position.Negative)
             {
                 currentAngle = NegativeRestingPlaceDegrees;
@@ -44,8 +48,6 @@ namespace KCSim.Parts.Mechanical
             {
                 currentAngle = PositiveRestingPlaceDegrees;
             }
-
-            this.motionTimer = motionTimer;
         }
 
         public override bool UpdateForce(Torqueable source, Force force)
@@ -63,7 +65,7 @@ namespace KCSim.Parts.Mechanical
             Force newForce = GetNetForce();
             if (!MotionMath.IsSameDirection(oldForce.Velocity, newForce.Velocity))
             {
-                double forceDelta = oldForce.Velocity - newForce.Velocity;
+                double forceDelta = newForce.Velocity - oldForce.Velocity;
                 double motionSign = forceDelta / Math.Abs(forceDelta); // will be either +1 or -1.
                 currentAngle += motionSign / currentAngle;
                 NotifyPaddlePositionChanged();
@@ -127,7 +129,7 @@ namespace KCSim.Parts.Mechanical
             return velocity < 0 ? NegativeRestingPlaceDegrees : PositiveRestingPlaceDegrees;
         }
 
-        private Position GetPosition()
+        public Position GetPosition()
         {
             switch (currentAngle)
             {

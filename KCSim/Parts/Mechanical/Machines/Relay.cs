@@ -8,6 +8,12 @@ namespace KCSim.Parts.Mechanical.Machines
 {
     public class Relay
     {
+        public enum InitialState
+        {
+            Disabled,
+            Enabled
+        }
+
         public readonly Axle Enable;
         public readonly Axle InputAxle;
         public readonly SmallGear InputGear;
@@ -16,34 +22,35 @@ namespace KCSim.Parts.Mechanical.Machines
         public readonly Paddle ArmPaddle;
 
         // functional properties of the part
+        private readonly Direction enableDirection;
         private readonly Direction inputDirection;
-        private readonly Direction paddleWheelEnableDirection;
+        private readonly Relay.InitialState initialState;
 
         // conditional couplings that are created and destroyed as the relay is enabled and disabled respectively
         private Coupling inputToConnectorCoupling;
         private Coupling connectorToOutputCoupling;
+        private Coupling paddleWheelToPaddleCoupling;
 
-        // fixed couplings
+        // other parts
         private readonly SmallGear connector;
-
-        private readonly string name;
+        private readonly PaddleWheel paddleWheel;
 
         private readonly ICouplingService couplingService;
+        private readonly string name;
 
         public Relay(
             ICouplingService couplingService,
             IPaddleFactory paddleFactory,
             Direction enableDirection,
             Direction inputDirection,
+            InitialState initialState = InitialState.Disabled,
             string name = "")
         {
             this.name = name;
             this.couplingService = couplingService;
+            this.enableDirection = enableDirection;
             this.inputDirection = inputDirection;
-
-            // Because the control axle has an opposing coupling with the control paddle, we record the sign of the control paddle
-            // as the inverse of that of the control axle.
-            paddleWheelEnableDirection = enableDirection;
+            this.initialState = initialState;
 
             InputAxle = new Axle(name: name + "; input axle");
             InputGear = new SmallGear(name + "; input gear");
@@ -51,11 +58,43 @@ namespace KCSim.Parts.Mechanical.Machines
             OutputGear = new SmallGear(name + "; output gear");
             OutputAxle = new Axle(name + "; output axle");
             Enable = new Axle(name + "; control axle");
+            paddleWheel = new PaddleWheel(name + "; paddle wheel");
 
-            ArmPaddle = paddleFactory.CreateNew(name: name + "; paddle");
+            ArmPaddle = paddleFactory.CreateNew(
+                initialPosition: GetInitialPaddlePosition(),
+                name: name + "; paddle");
             ArmPaddle.OnPaddlePositionChangedDelegateSet.Add(OnPaddlePositionChanged);
 
             InitializeCouplings();
+
+            if (initialState.Equals(Relay.InitialState.Enabled))
+            {
+                EngageRelay();
+            }
+        }
+
+        private Position GetInitialPaddlePosition()
+        {
+            if (initialState.Equals(InitialState.Disabled))
+            {
+                if (enableDirection.Equals(Direction.Positive))
+                {
+                    // The relay will be enabled when the paddle is rotated in the negative direction,
+                    // since it has an opposing coupling with the paddle wheel.
+                    return Position.Positive;
+                }
+
+                return Position.Negative;
+            }
+
+            if (enableDirection.Equals(Direction.Positive))
+            {
+                // The relay will be enabled when the paddle is rotated in the negative direction,
+                // since it has an opposing coupling with the paddle wheel.
+                return Position.Negative;
+            }
+
+            return Position.Positive;
         }
 
         private void OnPaddlePositionChanged(Paddle paddle, Position position)
@@ -66,12 +105,12 @@ namespace KCSim.Parts.Mechanical.Machines
                 DisengageRelay();
                 return;
             }
-            if (paddleWheelEnableDirection == Direction.Positive && position == Position.Positive)
+            if (enableDirection == Direction.Positive && position == Position.Positive)
             {
                 DisengageRelay();
                 return;
             }
-            if (paddleWheelEnableDirection == Direction.Negative && position == Position.Negative)
+            if (enableDirection == Direction.Negative && position == Position.Negative)
             {
                 DisengageRelay();
                 return;
@@ -117,33 +156,23 @@ namespace KCSim.Parts.Mechanical.Machines
                 output: InputGear,
                 name: "input axle to input gear");
 
-            // TODO: right now, the arm is not actually used in any functional way.
-            Arm arm = new Arm();
-            PaddleWheel controlPaddleWheel = new PaddleWheel(name + "; paddle wheel");
-
             // create fixed couplings for the control mechanism (paddle wheel, paddle, arm, and connector)
             couplingService.CreateNewLockedCoupling( // the control axle rotates the paddle wheel
                 input: Enable,
-                output: controlPaddleWheel);
-            //couplingService.CreateNewLockedCoupling( // the paddle rotates the fulcrum axle
-            //    input: ArmPaddle,
-            //    output: arm.FulcrumAxle);
-            //couplingService.CreateNewFreeFlowingCoupling( // the connector lowers and rises with the arm's end axle
-            //    input: arm.EndAxle,
-            //    output: connector);
-
-            // The interaction between the paddle wheel and the paddle is at the core of the control mechanism and
-            // requires special handling here, via a separate evaluator class.
-            couplingService.CreateNewOneWayCoupling(
-                input: controlPaddleWheel,
-                output: ArmPaddle,
-                direction: paddleWheelEnableDirection);
+                output: paddleWheel);
 
             // create fixed coupling for output
             couplingService.CreateNewLockedCoupling(
                 input: OutputGear,
                 output: OutputAxle,
                 name: "output gear to output axle");
+
+            // The interaction between the paddle wheel and the paddle is at the core of the control mechanism and
+            // requires special handling here, via a separate evaluator class.
+            paddleWheelToPaddleCoupling = couplingService.CreateNewOneWayPaddleCoupling(
+                paddleWheel,
+                ArmPaddle,
+                enableDirection);
         }
 
         public override string ToString()

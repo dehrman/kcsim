@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using KCSim.Parts.Mechanical;
 using KCSim.Parts.Mechanical.Atomic;
 using KCSim.Parts.State;
 
@@ -18,9 +19,9 @@ namespace KCSim.Physics.Couplings
             return new BidirectionalOpposingCoupling(input, output, 1.0, name);
         }
 
-        public Coupling CreateNewOneWayPaddleCoupling(Gear input, Gear output, Direction direction, string name = "")
+        public OneWayPaddleCoupling CreateNewOneWayPaddleCoupling(PaddleWheel paddleWheel, Paddle paddle, Direction direction, string name = "")
         {
-            return new OneWayPaddleCoupling(input, output, GetInputToOutputRatio(input, output), direction, name);
+            return new OneWayPaddleCoupling(paddleWheel, paddle, GetInputToOutputRatio(paddleWheel, paddle), direction, name);
         }
 
         public Coupling CreateNewFreeFlowingCoupling(Torqueable input, Torqueable output, string name = "")
@@ -33,7 +34,7 @@ namespace KCSim.Physics.Couplings
             return new BidirectionalOpposingCoupling(input, output, GetInputToOutputRatio(input, output), name);
         }
 
-        public InitialStateCoupling CreateNewInitialStateCoupling(InitialState initialForce, Torqueable output, string name = "")
+        public InitialStateCoupling CreateNewInitialStateCoupling(Parts.State.InitialState initialForce, Torqueable output, string name = "")
         {
             return new InitialStateCoupling(initialForce, output, name);
         }

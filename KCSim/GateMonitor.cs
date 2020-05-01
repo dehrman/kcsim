@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using KCSim.Parts.Logical;
@@ -19,6 +20,9 @@ namespace KCSim
         private readonly ICouplingMonitor couplingMonitor;
 
         private readonly IDictionary<Gate, ISet<Torqueable>> gatePower = new Dictionary<Gate, ISet<Torqueable>>();
+
+        private readonly ISet<GateTorqueablePair> torqueablesBeingMonitoredForForceChanges
+            = new HashSet<GateTorqueablePair>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GateMonitor"/> class.
@@ -125,7 +129,7 @@ namespace KCSim
 
             foreach (var torqueable in coupledTorqueables)
             {
-                torqueable.OnForceChange += GetOnForceChangeDelegate(gate, torqueable);
+                MonitorForceChanges(gate, torqueable);
             }
 
             ISet<Torqueable[]> torqueableArrays = gate.GetType().GetFields()
@@ -141,16 +145,57 @@ namespace KCSim
                 {
                     if (couplingMonitor.IsCoupled(torqueable))
                     {
-                        torqueable.OnForceChange += GetOnForceChangeDelegate(gate, torqueable);
+                        MonitorForceChanges(gate, torqueable);
                     }
                 }
             }
+        }
+
+        private void MonitorForceChanges(Gate gate, Torqueable torqueable)
+        {
+            var gateTorqueablePair = new GateTorqueablePair(gate, torqueable);
+            if (torqueablesBeingMonitoredForForceChanges.Contains(gateTorqueablePair))
+            {
+                return;
+            }
+            torqueablesBeingMonitoredForForceChanges.Add(gateTorqueablePair);
+            torqueable.OnForceChange += GetOnForceChangeDelegate(gate, torqueable);
         }
 
         private OnForceChangeDelegate GetOnForceChangeDelegate(Gate gate, Torqueable torqueable)
         {
             return (oldForce, newForce) =>
                 System.Diagnostics.Debug.WriteLine(gate + ", " + torqueable + " changed from " + oldForce + " to " + newForce);
+        }
+
+        private class GateTorqueablePair
+        {
+            public readonly Gate gate;
+            public readonly Torqueable torqueable;
+
+            internal GateTorqueablePair(Gate gate, Torqueable torqueable)
+            {
+                this.gate = gate;
+                this.torqueable = torqueable;
+            }
+
+            protected bool Equals(GateTorqueablePair other)
+            {
+                return Equals(gate, other.gate) && Equals(torqueable, other.torqueable);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                if (ReferenceEquals(this, obj)) return true;
+                if (obj.GetType() != this.GetType()) return false;
+                return Equals((GateTorqueablePair)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(gate, torqueable);
+            }
         }
     }
 }

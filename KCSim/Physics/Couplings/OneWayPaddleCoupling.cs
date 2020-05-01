@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using KCSim.Parts.Mechanical;
 using KCSim.Physics;
 
 namespace KCSim.Physics.Couplings
 {
-    class OneWayPaddleCoupling : Coupling
+    public class OneWayPaddleCoupling : Coupling
     {
         private Force inputToOutputForce;
         private Force outputToInputForce;
@@ -13,17 +14,19 @@ namespace KCSim.Physics.Couplings
         private readonly double inputToOutputRatio;
         private readonly double outputToInputRatio;
         private readonly double sign;
+        private readonly Paddle paddle;
 
         public OneWayPaddleCoupling(
-            Torqueable input,
-            Torqueable output,
+            PaddleWheel paddleWheel,
+            Paddle paddle,
             double inputToOutputRatio,
             Direction direction,
-            string name = "") : base(input, output, name)
+            string name = "") : base(paddleWheel, paddle, name)
         {
             this.inputToOutputRatio = inputToOutputRatio;
             this.outputToInputRatio = 1.0 / inputToOutputRatio;
             this.sign = direction.Sign();
+            this.paddle = paddle;
         }
 
         protected override Force GetInputForceOut()
@@ -42,13 +45,23 @@ namespace KCSim.Physics.Couplings
             // the force does NOT propagate to the output gear. 
             if (force.Velocity * sign <= 0)
             {
-                // One-way coupling does not engage in this case.
                 inputToOutputForce = Force.ZeroForce;
+                return;
             }
-            else
+
+            // If the paddle is in the engaged position, apply no more force.
+            if (sign > 0 && paddle.GetPosition().Equals(Paddle.Position.Negative))
             {
-                inputToOutputForce = new Force(force.Velocity * inputToOutputRatio * -1.0);
+                inputToOutputForce = Force.ZeroForce;
+                return;
             }
+            if (sign < 0 && paddle.GetPosition().Equals(Paddle.Position.Positive))
+            {
+                inputToOutputForce = Force.ZeroForce;
+                return;
+            }
+
+            inputToOutputForce = new Force(force.Velocity * inputToOutputRatio * -1.0);
         }
 
         protected override void ReceiveForceOnOutput(Force force)

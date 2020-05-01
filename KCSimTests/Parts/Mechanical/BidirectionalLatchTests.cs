@@ -26,7 +26,7 @@ namespace KCSimTests
 
             bidirectionalLatch = new BidirectionalLatch(
                 couplingService: couplingService,
-                relayFactory: testUtil.GetMockRelayFactory().Object);
+                relayFactory: testUtil.GetRelayFactory());
 
             couplingService.CreateNewLockedCoupling(motor, bidirectionalLatch.Power);
             couplingService.CreateNewLockedCoupling(inputSwitch, bidirectionalLatch.Input);
@@ -73,6 +73,22 @@ namespace KCSimTests
             forceEvaluator.EvaluateForces();
             Assert.Equal(Force.ZeroForce, bidirectionalLatch.OutputAxleNegative.GetNetForce());
             Assert.Equal(Force.ZeroForce, bidirectionalLatch.OutputAxlePositive.GetNetForce());
+        }
+
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(1)]
+        public void TestThat_WhenControlForceIsRemoved_OutputStaysPowered(int expectedValue)
+        {
+            motor.Force = new Force(1);
+            inputSwitch.Force = new Force(expectedValue);
+            forceEvaluator.EvaluateForces();
+
+            inputSwitch.Force = Force.ZeroForce;
+            forceEvaluator.EvaluateForces();
+
+            Assert.Equal(Force.ZeroForce, bidirectionalLatch.OutputAxleNegative.GetNetForce());
+            Assert.Equal(new Force(expectedValue), bidirectionalLatch.OutputAxlePositive.GetNetForce());
         }
 
         [Theory]

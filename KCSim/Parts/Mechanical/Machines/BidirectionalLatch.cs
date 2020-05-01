@@ -6,6 +6,12 @@ namespace KCSim.Parts.Mechanical
 {
     public class BidirectionalLatch
     {
+        public enum InitialState
+        {
+            Negative,
+            Positive
+        }
+
         public readonly Axle Input;
         public readonly Axle Power;
         public readonly Axle OutputAxlePositive;
@@ -14,11 +20,15 @@ namespace KCSim.Parts.Mechanical
         private readonly Relay positiveRelay;
         private readonly Relay negativeRelay;
 
+        // Keep a reference to the initial state for debugging purposes.
+        private readonly InitialState initialState;
+
         private readonly string name;
 
         public BidirectionalLatch(
             ICouplingService couplingService,
             IRelayFactory relayFactory,
+            InitialState initialState = InitialState.Negative,
             string name = "")
         {
             Input = new Axle(name + "; input control axle");
@@ -27,13 +37,16 @@ namespace KCSim.Parts.Mechanical
             OutputAxleNegative = new Axle(name + "; output axle for the negative signal");
 
             // Create the relays.
+            this.initialState = initialState;
             positiveRelay = relayFactory.CreateNew(
                 enableDirection: Direction.Positive,
                 inputDirection: Direction.Positive,
+                initialState: initialState.Equals(InitialState.Positive) ? Relay.InitialState.Enabled : Relay.InitialState.Disabled,
                 name: name + "; positive relay");
             negativeRelay = relayFactory.CreateNew(
                 enableDirection: Direction.Negative,
                 inputDirection: Direction.Negative,
+                initialState: initialState.Equals(InitialState.Negative) ? Relay.InitialState.Enabled : Relay.InitialState.Disabled,
                 name: name + "; negative relay");
 
             // Provide the relays with input power.

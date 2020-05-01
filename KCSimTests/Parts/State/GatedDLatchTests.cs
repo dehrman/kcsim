@@ -45,7 +45,6 @@ namespace KCSimTests.Parts.State
             var latchedValue = latch.Q.GetNetForce().Velocity;
             Assert.Equal(new Force(valueToLatch), new Force(latchedValue));
             Assert.Equal(valueToLatch, latchedValue);
-            Assert.Equal(new Force(valueToLatch * -1), latch.QInverse.GetNetForce());
         }
 
         [Theory]
@@ -66,7 +65,6 @@ namespace KCSimTests.Parts.State
 
             // We should expect to still see the initially latched-in value on the output wire.
             Assert.Equal(new Force(initialValue), latch.Q.GetNetForce());
-            Assert.Equal(new Force(initialValue * -1), latch.QInverse.GetNetForce());
         }
 
         [Theory]

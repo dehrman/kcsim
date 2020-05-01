@@ -10,11 +10,11 @@ namespace KCSim.Physics.Couplings
      */
     public class InitialStateCoupling : Coupling
     {
-        private readonly InitialState initialForce;
+        private readonly Parts.State.InitialState initialForce;
         private bool shouldApplyInitialForce;
 
         public InitialStateCoupling(
-            InitialState initialForce,
+            Parts.State.InitialState initialForce,
             Torqueable output,
             string name = "initial state coupling"
             ) : base(new ExternalSwitch(initialForce), output, name)

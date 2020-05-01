@@ -17,6 +17,9 @@ namespace KCSim
         private readonly IDictionary<Torqueable, ISet<OnCoupledToInputDelegate>> onCoupledToInputDelegates
             = new Dictionary<Torqueable, ISet<OnCoupledToInputDelegate>>();
 
+        private readonly IDictionary<Torqueable, OnForceChangeDelegate> torqueablesBeingMonitoredForForceChanges
+            = new Dictionary<Torqueable, OnForceChangeDelegate>();
+
         private readonly IPartsGraph partsGraph;
         private readonly ForceEvaluator forceEvaluator;
 
@@ -79,6 +82,8 @@ namespace KCSim
             partsGraph.RemoveEdge(coupling);
             forceEvaluator.AddToFrontOfEvaluationQueue(coupling);
 
+            RemoveAnyForceMonitoring(coupling);
+
             if (!onCouplingRemovedDelegates.ContainsKey(coupling))
             {
                 return;
@@ -102,12 +107,42 @@ namespace KCSim
 
         private void MonitorForceChanges(Torqueable torqueable)
         {
-            torqueable.OnForceChange += GetOnForceChangeDelegate(torqueable);
+            if (torqueablesBeingMonitoredForForceChanges.ContainsKey(torqueable))
+            {
+                return;
+            }
+            var onForceChangeDelegate = GetOnForceChangeDelegate(torqueable);
+            torqueablesBeingMonitoredForForceChanges.Add(torqueable, onForceChangeDelegate);
+            torqueable.OnForceChange += onForceChangeDelegate;
         }
 
         private OnForceChangeDelegate GetOnForceChangeDelegate(Torqueable torqueable)
         {
-            return (oldForce, newForce) => { }; // System.Diagnostics.Debug.WriteLine(torqueable + " changed from " + oldForce + " to " + newForce);
+            return (oldForce, newForce) =>
+            {
+                string debugString = torqueable + " changed from " + oldForce + " to " + newForce;
+                if (debugString.Contains(
+                    "SR latch; AND gate; inputLatchA; positive relay control diode; diode input axle"))
+                {
+                    System.Diagnostics.Debug.WriteLine("about to change the input latch A for the AND gate!");
+                }
+                System.Diagnostics.Debug.WriteLine(debugString);
+            };
         }
+
+        private void RemoveAnyForceMonitoring(Coupling coupling)
+        {
+            if (!torqueablesBeingMonitoredForForceChanges.ContainsKey(coupling.Input))
+            {
+                coupling.Input.OnForceChange -= torqueablesBeingMonitoredForForceChanges[coupling.Input];
+                torqueablesBeingMonitoredForForceChanges.Remove(coupling.Input);
+            }
+            if (!torqueablesBeingMonitoredForForceChanges.ContainsKey(coupling.Output))
+            {
+                coupling.Output.OnForceChange -= torqueablesBeingMonitoredForForceChanges[coupling.Output];
+                torqueablesBeingMonitoredForForceChanges.Remove(coupling.Output);
+            }
+        }
+
     }
 }

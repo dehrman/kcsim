@@ -45,7 +45,6 @@ namespace KCSim.Parts.State
 
             // Wire up the output.
             couplingService.CreateNewLockedCoupling(Latches[1].Q, Q);
-            couplingService.CreateNewLockedCoupling(Latches[1].QInverse, QInverse);
         }
     }
 }

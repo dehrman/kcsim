@@ -34,7 +34,7 @@ namespace KCSim
             this.velocity = velocity;
 
             double remainingMillisecondsToDestination =
-                degreesToDestination / (Math.Abs(velocity) * UnitVelocityInDegreesPerMillisecond);
+                Math.Abs(degreesToDestination) / (Math.Abs(velocity) * UnitVelocityInDegreesPerMillisecond);
 
             timer = new Timer(remainingMillisecondsToDestination);
             timer.Elapsed += OnTimedEvent;
