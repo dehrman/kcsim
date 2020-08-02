@@ -1,3 +1,4 @@
+using System;
 using KCSim;
 using KCSim.Parts.Mechanical.Machines;
 using KCSim.Physics;
@@ -9,6 +10,7 @@ namespace KCSimTests
     {
         private readonly TestUtil testUtil = new TestUtil();
         private readonly ForceEvaluator forceEvaluator;
+        private readonly ICouplingMonitor couplingMonitor;
 
         private readonly ExternalSwitch enable = new ExternalSwitch(name: "enable switch");
         private readonly ExternalSwitch input = new ExternalSwitch(name: "input switch");
@@ -16,6 +18,7 @@ namespace KCSimTests
         public RelayTests()
         {
             forceEvaluator = testUtil.GetSingletonForceEvaluator();
+            couplingMonitor = testUtil.GetSingletonCouplingMonitor();
         }
 
         [Theory]
@@ -42,6 +45,7 @@ namespace KCSimTests
             enable.Force = GetEnableForce(enableForce);
             input.Force = GetLatchedInputForce(latchedInputForce);
             var relay = GetRelay(enableForce, latchedInputForce);
+            couplingMonitor.OnCoupledToInput(relay.OutputGear, (coupling) => Console.WriteLine("output gear has been connected to input via new coupling: " + coupling));
             forceEvaluator.EvaluateForces();
             Assert.Equal(GetLatchedInputForce(latchedInputForce), relay.OutputAxle.GetNetForce());
         }

@@ -115,7 +115,7 @@ namespace KCSim
             //
             // The only condition in which we would want to continue propagating this force is if the
             // force no longer equals the net force coming from the target. Otherwise, we should break
-            // early.
+            // early. TODO: This doesn't make sense to me (as of 2020-08-01); need to clarify.
             if (sourceNetForce.Key == target
                 && targetForce.Equals(target.GetNetForce()))
             {
