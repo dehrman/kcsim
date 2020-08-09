@@ -75,7 +75,10 @@ namespace KCSim
             {
                 // Get the next coupling to evaluate.
                 EvaluationNode currentNode = evaluationQueue[0];
-                evaluationQueue.RemoveAt(0);
+                lock (evaluationQueue)
+                {
+                    evaluationQueue.RemoveAt(0);
+                }
 
                 // Visit the current node.
                 VisitNode(currentNode);
@@ -115,7 +118,7 @@ namespace KCSim
             //
             // The only condition in which we would want to continue propagating this force is if the
             // force no longer equals the net force coming from the target. Otherwise, we should break
-            // early. TODO: This doesn't make sense to me (as of 2020-08-01); need to clarify.
+            // early. TODO: This doesn't make sense to me (as of 2020-08-01).
             if (sourceNetForce.Key == target
                 && targetForce.Equals(target.GetNetForce()))
             {
@@ -181,7 +184,10 @@ namespace KCSim
             {
                 return;
             }
-            evaluationQueue.Add(evaluationNode);
+            lock (evaluationQueue)
+            {
+                evaluationQueue.Add(evaluationNode);
+            }
         }
 
         private void AddToFrontOfEvaluationQueue(EvaluationNode evaluationNode)
@@ -190,7 +196,10 @@ namespace KCSim
             {
                 evaluationQueue.Remove(evaluationNode);
             }
-            evaluationQueue.Insert(0, evaluationNode);
+            lock (evaluationQueue)
+            {
+                evaluationQueue.Insert(0, evaluationNode);
+            }
         }
 
         private class EvaluationNode

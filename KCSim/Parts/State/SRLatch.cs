@@ -23,8 +23,8 @@ namespace KCSim.Parts.State
             string name = "SR latch") : base(name)
         {
             // Create inputs unique to this stateful gate.
-            Set = new Axle(name + "; set inverse");
-            Reset = new Axle(name + "; reset inverse");
+            Set = new Axle(name + "; set");
+            Reset = new Axle(name + "; reset");
 
             // Create the gates.
             orGate = gateFactory.CreateNewOrGate(name: name + "; OR gate");

@@ -2,16 +2,13 @@
 using KCSim.Parts.Mechanical.Machines;
 using KCSim.Parts.State;
 using KCSim.Physics;
+using KCSimTests.Parts.Logical;
 using Xunit;
 
 namespace KCSimTests.Parts.State
 {
-    public class GatedDLatchTests
+    public class GatedDLatchTests : BaseGateTest
     {
-        private readonly TestUtil testUtil = new TestUtil();
-        private readonly ForceEvaluator forceEvaluator;
-        private readonly ICouplingService couplingService;
-
         private ExternalSwitch Power = new ExternalSwitch(new Force(1));
         private ExternalSwitch DataIn = new ExternalSwitch();
         private ExternalSwitch WriteEnable = new ExternalSwitch();
@@ -20,16 +17,13 @@ namespace KCSimTests.Parts.State
 
         public GatedDLatchTests()
         {
-            couplingService = testUtil.GetSingletonCouplingService();
-            forceEvaluator = testUtil.GetSingletonForceEvaluator();
-
             latch = testUtil.GetStateFactory().CreateNewGatedDLatch();
 
             couplingService.CreateNewLockedCoupling(Power, latch.Power);
             couplingService.CreateNewLockedCoupling(DataIn, latch.Data);
             couplingService.CreateNewLockedCoupling(WriteEnable, latch.Enable);
 
-            testUtil.InitializeState(latch);
+//            testUtil.InitializeState(latch);
         }
 
         [Theory]
@@ -40,7 +34,7 @@ namespace KCSimTests.Parts.State
             DataIn.Force = new Force(valueToLatch);
             WriteEnable.Force = new Force(1);
 
-            forceEvaluator.EvaluateForces();
+            EvaluateForcesWithDelay();
 
             var latchedValue = latch.Q.GetNetForce().Velocity;
             Assert.Equal(new Force(valueToLatch), new Force(latchedValue));
@@ -56,12 +50,12 @@ namespace KCSimTests.Parts.State
             // Latch in the initial value.
             DataIn.Force = new Force(initialValue);
             WriteEnable.Force = new Force(1);
-            forceEvaluator.EvaluateForces();
+            EvaluateForcesWithDelay();
 
             // Now disable the write enable and set the data input to the next value.
             WriteEnable.Force = new Force(-1);
             DataIn.Force = new Force(nextValue);
-            forceEvaluator.EvaluateForces();
+            EvaluateForcesWithDelay();
 
             // We should expect to still see the initially latched-in value on the output wire.
             Assert.Equal(new Force(initialValue), latch.Q.GetNetForce());
@@ -75,16 +69,22 @@ namespace KCSimTests.Parts.State
             // Latch in the initial value.
             DataIn.Force = new Force(oldValue);
             WriteEnable.Force = new Force(1);
-            forceEvaluator.EvaluateForces();
+            EvaluateForcesWithDelay();
+            EvaluateForcesWithDelay();
+            EvaluateForcesWithDelay();
 
             // Now disable the write enable and set the data input to the new value.
             WriteEnable.Force = new Force(-1);
             DataIn.Force = new Force(newValue);
-            forceEvaluator.EvaluateForces();
+            EvaluateForcesWithDelay();
+            EvaluateForcesWithDelay();
+            EvaluateForcesWithDelay();
 
             // Now enable the write enable.
             WriteEnable.Force = new Force(1);
-            forceEvaluator.EvaluateForces();
+            EvaluateForcesWithDelay();
+            EvaluateForcesWithDelay();
+            EvaluateForcesWithDelay();
 
             // We should expect to see that the old value was overwritten, and the new value is present.
             TestUtil.AssertDirectionsEqual(new Force(newValue), latch.Q.GetNetForce());

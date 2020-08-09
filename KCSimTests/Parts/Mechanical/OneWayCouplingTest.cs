@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using KCSim;
+﻿using KCSim;
 using KCSim.Parts.Mechanical.Atomic;
 using KCSim.Parts.Mechanical.Machines;
 using KCSim.Physics;
 using KCSim.Physics.Couplings;
 using Xunit;
 
-namespace KCSimTests.Parts.Mechanical
+namespace KCSimTests.Parts.Mechanical.Parts.Mechanical
 {
     public class OneWayCouplingTest
     {
@@ -20,8 +17,6 @@ namespace KCSimTests.Parts.Mechanical
 
         private readonly Gear inputGear = new SmallGear();
         private readonly Gear outputGear = new SmallGear();
-
-        private readonly Coupling coupling;
 
         public OneWayCouplingTest()
         {

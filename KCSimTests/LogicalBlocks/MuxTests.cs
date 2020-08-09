@@ -1,31 +1,25 @@
 ﻿using System.Linq;
+using System.Threading;
 using KCSim;
 using KCSim.LogicalBlocks;
 using KCSim.Parts.Logical;
 using KCSim.Parts.Mechanical.Atomic;
 using KCSim.Parts.Mechanical.Machines;
 using KCSim.Physics;
+using KCSimTests.Parts.Logical;
 using Xunit;
 
 namespace KCSimTests.LogicalBlocks
 {
-    public class MuxTests
+    public class MuxTests : BaseGateTest
     {
-        private readonly TestUtil testUtil;
-        private readonly ICouplingService couplingService;
-        private readonly IGateFactory gateFactory;
         private readonly LogicalBlockFactory logicalBlockFactory;
-        private readonly ForceEvaluator forceEvaluator;
 
         private readonly ExternalSwitch motor = new ExternalSwitch(new Force(1));
 
         public MuxTests()
         {
-            testUtil = new TestUtil();
-            couplingService = testUtil.GetSingletonCouplingService();
-            gateFactory = testUtil.GetGateFactory();
             logicalBlockFactory = new LogicalBlockFactory(couplingService, gateFactory);
-            forceEvaluator = testUtil.GetSingletonForceEvaluator();
         }
 
         [Theory]
@@ -73,7 +67,7 @@ namespace KCSimTests.LogicalBlocks
                     selectLines[i].Force = new Force(shouldSetSelectLine[i] ? 1 : -1);
                 }
 
-                forceEvaluator.EvaluateForces();
+                EvaluateForcesWithDelay(numEvaluations: 10, sleepMsBetweenEvaluations: 30);
 
                 TestUtil.AssertDirectionsEqual(inputs[inputToExpectOnOutput].GetNetForce(), mux.Output.GetNetForce());
             }

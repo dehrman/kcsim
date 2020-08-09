@@ -2,12 +2,11 @@
 
 using KCSim.Parts.Mechanical;
 using KCSim.Physics;
-using Moq;
 using KCSim;
 using KCSim.Parts.Mechanical.Machines;
-using KCSim.Physics.Couplings;
+using System.Threading;
 
-namespace KCSimTests
+namespace KCSimTests.Parts.Mechanical
 {
     public class BidirectionalLatchTests
     {
@@ -35,12 +34,11 @@ namespace KCSimTests
         [Theory]
         [InlineData(1, 1, 0)]
         [InlineData(-1, 0, -1)]
-        [InlineData(0, 0, 0)]
         public void TestThat_ControlValuesArePersistedToOutputAsExpected(int input, int expectedPositiveOutput, int expectedNegativeOutput)
         {
             motor.Force = new Force(1);
             inputSwitch.Force = new Force(input);
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
             Assert.Equal(new Force(expectedNegativeOutput), bidirectionalLatch.OutputAxleNegative.GetNetForce());
             Assert.Equal(new Force(expectedPositiveOutput), bidirectionalLatch.OutputAxlePositive.GetNetForce());
         }
@@ -48,18 +46,15 @@ namespace KCSimTests
         [Theory]
         [InlineData(1, 1, 0)]
         [InlineData(-1, 0, -1)]
-        [InlineData(0, 0, 0)]
         public void TestThat_ControlValuesRemainLatchedAfterControlGoesToZero(int input, int expectedPositiveOutput, int expectedNegativeOutput)
         {
             motor.Force = new Force(1);
 
-            // Latch in data only briefly, then remove the input. This only works because the mock motion timer
-            // invokes its callback functions immediately in test environments. In a real simulation (which
-            // is an oxymoron), we would need to wait some time before removing the force on the control axle.
+            // Latch in data only briefly, then remove the input.
             inputSwitch.Force = new Force(input);
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
             inputSwitch.Force = Force.ZeroForce;
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
 
             Assert.Equal(new Force(expectedNegativeOutput), bidirectionalLatch.OutputAxleNegative.GetNetForce());
             Assert.Equal(new Force(expectedPositiveOutput), bidirectionalLatch.OutputAxlePositive.GetNetForce());
@@ -70,7 +65,7 @@ namespace KCSimTests
         {
             motor.Force = Force.ZeroForce;
             inputSwitch.Force = new Force(1);
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
             Assert.Equal(Force.ZeroForce, bidirectionalLatch.OutputAxleNegative.GetNetForce());
             Assert.Equal(Force.ZeroForce, bidirectionalLatch.OutputAxlePositive.GetNetForce());
         }
@@ -82,13 +77,20 @@ namespace KCSimTests
         {
             motor.Force = new Force(1);
             inputSwitch.Force = new Force(expectedValue);
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
 
             inputSwitch.Force = Force.ZeroForce;
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
 
-            Assert.Equal(Force.ZeroForce, bidirectionalLatch.OutputAxleNegative.GetNetForce());
-            Assert.Equal(new Force(expectedValue), bidirectionalLatch.OutputAxlePositive.GetNetForce());
+            if (expectedValue < 0)
+            {
+                Assert.Equal(new Force(expectedValue), bidirectionalLatch.OutputAxleNegative.GetNetForce());
+                Assert.Equal(Force.ZeroForce, bidirectionalLatch.OutputAxlePositive.GetNetForce());
+            } else
+            {
+                Assert.Equal(Force.ZeroForce, bidirectionalLatch.OutputAxleNegative.GetNetForce());
+                Assert.Equal(new Force(expectedValue), bidirectionalLatch.OutputAxlePositive.GetNetForce());
+            }
         }
 
         [Theory]
@@ -100,11 +102,11 @@ namespace KCSimTests
 
             // Latch in the initial value.
             inputSwitch.Force = new Force(oldValue);
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
 
             // Latch in the new value.
             inputSwitch.Force = new Force(newValue);
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
 
             if (newValue < 0)
             {
@@ -119,7 +121,7 @@ namespace KCSimTests
 
             // And now back to old values.
             inputSwitch.Force = new Force(oldValue);
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
 
             if (oldValue < 0)
             {
@@ -132,6 +134,13 @@ namespace KCSimTests
                 Assert.Equal(new Force(newValue), bidirectionalLatch.OutputAxlePositive.GetNetForce());
             }
 
+        }
+
+        private void EvalutateForcesWithDelay()
+        {
+            forceEvaluator.EvaluateForces();
+            Thread.Sleep(1000);
+            forceEvaluator.EvaluateForces();
         }
     }
 }

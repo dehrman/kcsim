@@ -4,7 +4,7 @@ using KCSim.Parts.Mechanical.Machines;
 using KCSim.Physics;
 using Xunit;
 
-namespace KCSimTests
+namespace KCSimTests.Parts.Mechanical
 {
     public class DiodeTests
     {

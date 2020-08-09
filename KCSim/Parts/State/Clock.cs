@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using KCSim.Parts.Mechanical.Machines;
 using KCSim.Physics;
 
 namespace KCSim.Parts.State
@@ -10,8 +11,13 @@ namespace KCSim.Parts.State
 
         public readonly ClockLevel Level;
 
-        public Clock(IOscillator oscillator)
+        public ICouplingService couplingService;
+
+        public Clock(
+            Power power,
+            IOscillator oscillator)
         {
+            oscillator.CouplePowerInput(power);
             oscillator.GetOnQChangedDelegateSet().Add(OnQChanged);
             Level = new ClockLevel();
         }

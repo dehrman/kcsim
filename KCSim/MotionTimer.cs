@@ -8,7 +8,7 @@ namespace KCSim
     {
         // For the unit velocity (that is velocity = 1), how many degrees are swept per millisecond?
         // If this value is 10, that means 10 degrees are swept per millisecond.
-        private static readonly double UnitVelocityInDegreesPerMillisecond = 1;
+        private static readonly double UnitVelocityInDegreesPerMillisecond = 1000;
 
         private OnTimerCompletionDelegate onTimerCompletion;
         private double velocity = 0;
@@ -36,7 +36,7 @@ namespace KCSim
             double remainingMillisecondsToDestination =
                 Math.Abs(degreesToDestination) / (Math.Abs(velocity) * UnitVelocityInDegreesPerMillisecond);
 
-            timer = new Timer(remainingMillisecondsToDestination);
+            timer = new Timer(remainingMillisecondsToDestination < 1 ? 1 : remainingMillisecondsToDestination);
             timer.Elapsed += OnTimedEvent;
             timer.AutoReset = false;
             timer.Enabled = true;

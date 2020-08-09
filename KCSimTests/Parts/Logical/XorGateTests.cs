@@ -6,12 +6,8 @@ using Xunit;
 
 namespace KCSimTests.Parts.Logical
 {
-    public class XorGateTests
+    public class XorGateTests : BaseGateTest
     {
-        private readonly TestUtil testUtil = new TestUtil();
-        private readonly ForceEvaluator forceEvaluator;
-        private readonly ICouplingService couplingService;
-
         private readonly ExternalSwitch inputASwitch = new ExternalSwitch();
         private readonly ExternalSwitch inputBSwitch = new ExternalSwitch();
         private readonly ExternalSwitch motor = new ExternalSwitch(new Force(1));
@@ -19,10 +15,6 @@ namespace KCSimTests.Parts.Logical
 
         public XorGateTests()
         {
-            forceEvaluator = testUtil.GetSingletonForceEvaluator();
-            couplingService = testUtil.GetSingletonCouplingService();
-
-            IGateFactory gateFactory = testUtil.GetGateFactory();
             xorGate = gateFactory.CreateNewXorGate();
 
             couplingService.CreateNewLockedCoupling(inputASwitch, xorGate.InputA);
@@ -37,10 +29,10 @@ namespace KCSimTests.Parts.Logical
         [InlineData(1, 1, -1)]
         public void TestThat_TruthTableHolds(int inputA, int inputB, int expectedOutput)
         {
-            inputASwitch.Force = new Force(inputA);
-            inputBSwitch.Force = new Force(inputB);
-            forceEvaluator.EvaluateForces();
-            Assert.Equal(new Force(expectedOutput), xorGate.Output.GetNetForce());
+            inputASwitch.Force = new Force(inputA * 1000);
+            inputBSwitch.Force = new Force(inputB * 1000);
+            EvaluateForcesWithDelay();
+            TestUtil.AssertDirectionsEqual(new Force(expectedOutput), xorGate.Output.GetNetForce());
         }
     }
 }

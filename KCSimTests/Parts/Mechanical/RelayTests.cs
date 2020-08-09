@@ -1,10 +1,10 @@
-using System;
+using System.Threading;
 using KCSim;
 using KCSim.Parts.Mechanical.Machines;
 using KCSim.Physics;
 using Xunit;
 
-namespace KCSimTests
+namespace KCSimTests.Parts.Mechanical
 {
     public class RelayTests
     {
@@ -31,7 +31,7 @@ namespace KCSimTests
             enable.Force = Force.ZeroForce;
             input.Force = GetLatchedInputForce(latchedInputForce);
             var relay = GetRelay(enableForce, latchedInputForce);
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
             Assert.Equal(Force.ZeroForce, relay.OutputAxle.GetNetForce());
         }
 
@@ -45,8 +45,7 @@ namespace KCSimTests
             enable.Force = GetEnableForce(enableForce);
             input.Force = GetLatchedInputForce(latchedInputForce);
             var relay = GetRelay(enableForce, latchedInputForce);
-            couplingMonitor.OnCoupledToInput(relay.OutputGear, (coupling) => Console.WriteLine("output gear has been connected to input via new coupling: " + coupling));
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
             Assert.Equal(GetLatchedInputForce(latchedInputForce), relay.OutputAxle.GetNetForce());
         }
 
@@ -60,7 +59,7 @@ namespace KCSimTests
             enable.Force = GetDisableForce(enableForce);
             input.Force = GetLatchedInputForce(latchedInputForce);
             var relay = GetRelay(enableForce, latchedInputForce);
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
             Assert.Equal(Force.ZeroForce, relay.OutputAxle.GetNetForce());
         }
 
@@ -74,7 +73,7 @@ namespace KCSimTests
             enable.Force = GetEnableForce(enableForce);
             input.Force = GetNonLatchedInputForce(latchedInputForce);
             var relay = GetRelay(enableForce, latchedInputForce);
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
             Assert.Equal(Force.ZeroForce, relay.OutputAxle.GetNetForce());
         }
 
@@ -88,11 +87,11 @@ namespace KCSimTests
             enable.Force = GetEnableForce(enableForce);
             input.Force = GetLatchedInputForce(latchedInputForce);
             var relay = GetRelay(enableForce, latchedInputForce);
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
             Assert.Equal(GetLatchedInputForce(latchedInputForce), relay.OutputAxle.GetNetForce());
 
             enable.Force = Force.ZeroForce;
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
             Assert.Equal(GetLatchedInputForce(latchedInputForce), relay.OutputAxle.GetNetForce());
         }
 
@@ -106,10 +105,10 @@ namespace KCSimTests
             enable.Force = GetEnableForce(enableForce);
             input.Force = GetLatchedInputForce(latchedInputForce);
             var relay = GetRelay(enableForce, latchedInputForce);
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
 
             enable.Force = GetDisableForce(enableForce);
-            forceEvaluator.EvaluateForces();
+            EvalutateForcesWithDelay();
 
             Assert.Equal(GetLatchedInputForce(latchedInputForce), relay.OutputAxle.GetNetForce());
         }
@@ -148,6 +147,13 @@ namespace KCSimTests
             couplingService.CreateNewLockedCoupling(input, relay.InputAxle);
 
             return relay;
+        }
+
+        private void EvalutateForcesWithDelay()
+        {
+            forceEvaluator.EvaluateForces();
+            Thread.Sleep(1000);
+            forceEvaluator.EvaluateForces();
         }
     }
 }

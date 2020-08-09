@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>KCSim</name>
+    </assembly>
+    <members>
+        <member name="M:KCSim.BitMath.GetBitVector(System.Int32,System.Int32)">
+             <summary>
+             Convert a number into a bit vector represented as an array of boolean values.
+            
+             For example, 9 will result in the boolean array, {true, false, false, true}.
+             </summary>
+             <param name="numBits">the number of bits in the resulting bit vector</param>
+             <param name="number">the number to be converted into the bit vector</param>
+             <returns>a new boolean array containing the number represented in binary format
+             using true and false for 0 and 1</returns>
+        </member>
+        <member name="M:KCSim.CouplingMonitor.OnCouplingRemoved(KCSim.Physics.Couplings.Coupling,KCSim.ICouplingMonitor.OnCouplingRemovedDelegate)">
+            Invoke a delegate if the provided Coupling is removed.
+        </member>
+        <member name="M:KCSim.CouplingMonitor.OnCoupledToInput(KCSim.Physics.Torqueable,KCSim.ICouplingMonitor.OnCoupledToInputDelegate)">
+            Invoke a delegate if the provided Torqueable is coupled to an input (i.e. coupled as an output).
+        </member>
+        <member name="T:KCSim.CouplingService">
+            A singleton service that creates and tracks couplings between parts.
+        </member>
+        <member name="T:KCSim.GateMonitor">
+             <summary>
+             A monitor for any <see cref="T:KCSim.Parts.Logical.Gate"/> that has been explicitly registered for monitoring.
+            
+             This monitor is used primarily for debugging (e.g. printing debug statements as gates' inputs
+             and outputs change) and for validating certain conditions about gates.
+             </summary>
+        </member>
+        <member name="M:KCSim.GateMonitor.#ctor(KCSim.IPartsGraph,KCSim.ICouplingMonitor)">
+            <summary>
+            Initializes a new instance of the <see cref="T:KCSim.GateMonitor"/> class.
+            </summary>
+            <param name="partsGraph">The parts graph.</param>
+            <param name="couplingMonitor">The coupling monitor.</param>
+        </member>
+        <member name="M:KCSim.GateMonitor.RegisterGate``1(``0)">
+            <summary>
+            Register a <see cref="T:KCSim.Parts.Logical.Gate"/> for monitoring.
+            </summary>
+            <typeparam name="T">the type of gate</typeparam>
+            <param name="gate">the gate to register</param>
+            <returns></returns>
+        </member>
+        <member name="M:KCSim.GateMonitor.ValidateNoUnpoweredGates">
+            <summary>
+            Validate that there are no unpowered gates that should have power.
+            </summary>
+            <exception cref="T:KCSim.Parts.Logical.UnpoweredGateException">Thrown when there are unpowered gates which should have power.</exception>
+        </member>
+        <member name="T:KCSim.Parts.Logical.Buffer">
+            A buffer is used to amplify a weak (i.e. low-torque) signal to a level suitable for driving
+            the inputs of subsequent gates.
+            
+            Here, a buffer is implemented via a latch.
+        </member>
+        <member name="T:KCSim.Parts.Logical.GateFactory">
+            The AND gate is the funadmental logic unit of all gates. Given that a NOT gate is trivial
+            (two coupled gears), we construct all other gates from AND and NOT gates.
+            
+            Note that in the physical machine, an AND gate is also the standard module size. Therefore,
+            if a gate requires, say, three AND gates for its construction, it can be assumed that that
+            gate requires three standard modules of parts, space, and power.
+        </member>
+        <member name="M:KCSim.Parts.Logical.GateFactory.CreateNewNotGate(System.Boolean,System.String)">
+            Trivial construction—no standard module required
+        </member>
+        <member name="M:KCSim.Parts.Logical.GateFactory.CreateNewAndGate(System.Boolean,System.String)">
+            Requires one standard module
+        </member>
+        <member name="M:KCSim.Parts.Logical.GateFactory.CreateNewOrGate(System.Boolean,System.String)">
+            Requires one standard module
+        </member>
+        <member name="M:KCSim.Parts.Logical.GateFactory.CreateNewNandGate(System.Boolean,System.String)">
+            Requires one standard module
+        </member>
+        <member name="M:KCSim.Parts.Logical.GateFactory.CreateNewXorGate(System.Boolean,System.String)">
+            Requires three standard modules
+        </member>
+        <member name="T:KCSim.Parts.State.GatedDLatch">
+            A gated D latch based on an SR NOR latch
+        </member>
+        <member name="T:KCSim.Physics.Couplings.Coupling">
+            The purpose of this class is to define and manage how forces are transferred between two Torqueables
+        </member>
+        <member name="M:KCSim.Physics.Couplings.Coupling.ReceiveForce(KCSim.Physics.Torqueable,KCSim.Physics.Force)">
+            Receive a force on this coupling, for the given torqueable, and return a force to be applied
+            to the next node(s) in the structure.
+        </member>
+        <member name="T:KCSim.Physics.Couplings.InitialStateCoupling">
+            This is a special kind of coupling used in situations when we need to bring a circuit into a known
+            initial state (e.g. in a ring oscillator).
+        </member>
+        <member name="T:KCSim.Power">
+            <summary>
+            Power intended to be supplied to any parts in the computer requiring power.
+            </summary>
+        </member>
+        <member name="M:KCSim.Power.#ctor(KCSim.Physics.Force)">
+            <summary>
+            Initializes a new instance of the <see cref="T:KCSim.Power"/> class.
+            </summary>
+            <param name="initialForce">The power force.</param>
+        </member>
+        <member name="T:KCSim.Program">
+            <summary>
+            The entry point for the simulator.
+            
+            All that this class does is set up the dependency injection framework, instantiate the simulator class, and
+            defer to the simulator to start up.
+            </summary>
+        </member>
+        <member name="M:KCSim.Program.Main(System.String[])">
+            <summary>
+            The entry point (e.g. from the command line) for the whole simulator
+            </summary>
+            <param name="args">The args.</param>
+        </member>
+    </members>
+</doc>

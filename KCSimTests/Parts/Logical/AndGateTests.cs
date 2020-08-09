@@ -6,23 +6,18 @@ using Xunit;
 
 namespace KCSimTests.Parts.Logical
 {
-    public class AndGateTests
+    /// <summary>
+    /// The and gate tests.
+    /// </summary>
+    public class AndGateTests : BaseGateTest
     {
-        private readonly TestUtil testUtil = new TestUtil();
-        private readonly ForceEvaluator forceEvaluator;
-        private readonly ICouplingService couplingService;
-
         private readonly ExternalSwitch inputASwitch = new ExternalSwitch();
         private readonly ExternalSwitch inputBSwitch = new ExternalSwitch();
-        private readonly ExternalSwitch motor = new ExternalSwitch(new Force(1));
+        private readonly ExternalSwitch motor = new ExternalSwitch(new Force(1 * 1000));
         private readonly AndGate andGate;
 
         public AndGateTests()
         {
-            forceEvaluator = testUtil.GetSingletonForceEvaluator();
-            couplingService = testUtil.GetSingletonCouplingService();
-
-            IGateFactory gateFactory = testUtil.GetGateFactory();
             andGate = gateFactory.CreateNewAndGate();
 
             couplingService.CreateNewLockedCoupling(inputASwitch, andGate.InputA);
@@ -37,28 +32,28 @@ namespace KCSimTests.Parts.Logical
         [InlineData(1, 1, 1)]
         public void TestThat_TruthTableHolds(int inputA, int inputB, int expectedOutput)
         {
-            inputASwitch.Force = new Force(inputA);
-            inputBSwitch.Force = new Force(inputB);
-            forceEvaluator.EvaluateForces();
-            Assert.Equal(new Force(expectedOutput), andGate.Output.GetNetForce());
+            inputASwitch.Force = new Force(inputA * 1000);
+            inputBSwitch.Force = new Force(inputB * 1000);
+            EvaluateForcesWithDelay();
+            TestUtil.AssertDirectionsEqual(new Force(expectedOutput), andGate.Output.GetNetForce());
         }
 
         [Fact]
         public void TestThat_ValuesCanToggleBackAndForth()
         {
-            inputASwitch.Force = new Force(1);
+            inputASwitch.Force = new Force(1 * 1000);
 
-            inputBSwitch.Force = new Force(-1);
-            forceEvaluator.EvaluateForces();
-            Assert.Equal(new Force(-1), andGate.Output.GetNetForce());
+            inputBSwitch.Force = new Force(-1 * 1000);
+            EvaluateForcesWithDelay();
+            TestUtil.AssertDirectionsEqual(new Force(-1 * 1000), andGate.Output.GetNetForce());
 
-            inputBSwitch.Force = new Force(1);
-            forceEvaluator.EvaluateForces();
-            Assert.Equal(new Force(1), andGate.Output.GetNetForce());
+            inputBSwitch.Force = new Force(1 * 1000);
+            EvaluateForcesWithDelay();
+            TestUtil.AssertDirectionsEqual(new Force(1 * 1000), andGate.Output.GetNetForce());
 
-            inputBSwitch.Force = new Force(-1);
-            forceEvaluator.EvaluateForces();
-            Assert.Equal(new Force(-1), andGate.Output.GetNetForce());
+            inputBSwitch.Force = new Force(-1 * 1000);
+            EvaluateForcesWithDelay();
+            TestUtil.AssertDirectionsEqual(new Force(-1 * 1000), andGate.Output.GetNetForce());
         }
 
         [Theory]
@@ -68,18 +63,18 @@ namespace KCSimTests.Parts.Logical
         [InlineData(1, 1, 1)]
         public void TestThat_InputsAreUnpowered_OutputsRemainTheSame(int inputA, int inputB, int expectedOutput)
         {
-            inputASwitch.Force = new Force(inputA);
-            inputBSwitch.Force = new Force(inputB);
-            forceEvaluator.EvaluateForces();
+            inputASwitch.Force = new Force(inputA * 1000);
+            inputBSwitch.Force = new Force(inputB * 1000);
+            EvaluateForcesWithDelay();
             TestUtil.AssertDirectionsEqual(new Force(expectedOutput), andGate.Output.GetNetForce());
 
             inputBSwitch.Force = Force.ZeroForce;
-            forceEvaluator.EvaluateForces();
-            Assert.Equal(new Force(expectedOutput), andGate.Output.GetNetForce());
+            EvaluateForcesWithDelay();
+            TestUtil.AssertDirectionsEqual(new Force(expectedOutput), andGate.Output.GetNetForce());
 
             inputASwitch.Force = Force.ZeroForce;
-            forceEvaluator.EvaluateForces();
-            Assert.Equal(new Force(expectedOutput), andGate.Output.GetNetForce());
+            EvaluateForcesWithDelay();
+            TestUtil.AssertDirectionsEqual(new Force(expectedOutput), andGate.Output.GetNetForce());
         }
     }
 }

@@ -11,18 +11,20 @@ namespace KCSim
 {
     public class Simulator
     {
-        private readonly IStateFactory stateFactory;
+        private readonly IPaddleFactory paddleFactory;
         private readonly IGateFactory gateFactory;
+        private readonly IStateFactory stateFactory;
         private readonly ICouplingService couplingService;
         private readonly ForceEvaluator forceEvaluator;
-        private readonly IPaddleFactory paddleFactory;
+        private readonly Clock clock;
 
         public Simulator(
-            IStateFactory stateFactory,
+            IPaddleFactory paddleFactory,
             IGateFactory gateFactory,
+            IStateFactory stateFactory,
             ICouplingService couplingService,
             ForceEvaluator forceEvaluator,
-            IPaddleFactory paddleFactory
+            Clock clock
             )
         {
             this.stateFactory = stateFactory;
@@ -32,46 +34,17 @@ namespace KCSim
             this.paddleFactory = paddleFactory;
         }
 
-        public void RunSimulation()
+        public void Start()
         {
             ExternalSwitch Power = new ExternalSwitch(new Force(1), "power");
-            ExternalSwitch Set = new ExternalSwitch(new Force(1), "set");
-            ExternalSwitch Reset = new ExternalSwitch(new Force(1), "reset");
 
-            SRLatch srLatch = stateFactory.CreateNewSRLatch();
-            couplingService.CreateNewLockedCoupling(Power, srLatch.Power);
-            couplingService.CreateNewLockedCoupling(Set, srLatch.Set);
-            couplingService.CreateNewLockedCoupling(Reset, srLatch.Reset);
 
-            AndGate andGate = gateFactory.CreateNewAndGate();
-            couplingService.CreateNewLockedCoupling(Power, andGate.Power);
-            couplingService.CreateNewLockedCoupling(Set, andGate.InputA);
-            couplingService.CreateNewLockedCoupling(Reset, andGate.InputB);
+            DFlipFlop flipFlop = stateFactory.CreateNewDFlipFlop();
+            
 
             forceEvaluator.EvaluateForces();
-            Thread.Sleep(1);
+            Thread.Sleep(1000);
             forceEvaluator.EvaluateForces();
-            // Thread.Sleep(2000);
-            // forceEvaluator.EvaluateForces();
-
-            Console.WriteLine("AND output: " + andGate.Output);
-            Console.WriteLine("SR latch output: " + srLatch.Q);
-
-            int enableForce = 1;
-            int latchedInputForce = 1;
-
-            ExternalSwitch enable = new ExternalSwitch();
-            ExternalSwitch input = new ExternalSwitch();
-            enable.Force = GetEnableForce(enableForce);
-            input.Force = GetLatchedInputForce(latchedInputForce);
-            var relay = GetRelay(enableForce, latchedInputForce, enable, input);
-            // couplingMonitor.OnCoupledToInput(relay.OutputGear, (coupling) => Console.WriteLine("output gear has been connected to input via new coupling: " + coupling));
-
-            forceEvaluator.EvaluateForces();
-            Thread.Sleep(100);
-            forceEvaluator.EvaluateForces();
-
-            Console.WriteLine("Expecting " + GetLatchedInputForce(latchedInputForce) + "; received " + relay.OutputAxle.GetNetForce());
         }
 
 

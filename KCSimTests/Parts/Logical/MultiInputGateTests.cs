@@ -9,30 +9,15 @@ using Xunit;
 
 namespace KCSimTests.Parts.Logical
 {
-    public class MultiInputGateTests
+    public class MultiInputGateTests : BaseGateTest
     {
-        private readonly TestUtil testUtil = new TestUtil();
-        private readonly IGateFactory gateFactory;
-        private readonly ICouplingService couplingService;
-        private readonly ForceEvaluator forceEvaluator;
-
-        private readonly ExternalSwitch motor = new ExternalSwitch(new Force(1));
-
-        public MultiInputGateTests()
-        {
-            gateFactory = testUtil.GetGateFactory();
-            couplingService = testUtil.GetSingletonCouplingService();
-            forceEvaluator = testUtil.GetSingletonForceEvaluator();
-        }
+        private readonly ExternalSwitch motor = new ExternalSwitch(new Force(1 * 1_000_000));
 
         [Theory]
         [InlineData(2)]
         [InlineData(3)]
         [InlineData(4)]
         [InlineData(5)]
-        [InlineData(6)]
-        [InlineData(7)]
-        [InlineData(8)]
         public void TestThat_TruthTableHolds_ForMultiInputAndGate(int numInputs)
         {
             TestTruthTableForGate(
@@ -46,9 +31,6 @@ namespace KCSimTests.Parts.Logical
         [InlineData(3)]
         [InlineData(4)]
         [InlineData(5)]
-        [InlineData(6)]
-        [InlineData(7)]
-        [InlineData(8)]
         public void TestThat_TruthTableHolds_ForMultiInputOrGate(int numInputs)
         {
             TestTruthTableForGate(
@@ -76,14 +58,14 @@ namespace KCSimTests.Parts.Logical
 
                 for (int i = 0; i < inputs.Length; i++)
                 {
-                    var input = inputs[i] ? new Force(1) : new Force(-1);
+                    var input = inputs[i] ? new Force(1 * 1_000_000) : new Force(-1 * 1_000_000);
                     var coupling = couplingService.CreateNewLockedCoupling(new ExternalSwitch(input), gate.Inputs[i]);
                     initialStateCouplings[i] = coupling;
                 }
 
-                forceEvaluator.EvaluateForces();
+                EvaluateForcesWithDelay();
 
-                TestUtil.AssertDirectionsEqual(new Force(expectedOutput ? 1 : -1), gate.Output.GetNetForce());
+                TestUtil.AssertDirectionsEqual(new Force(expectedOutput ? 1 * 1_000_000 : -1 * 1_000_000), gate.Output.GetNetForce());
 
                 // Now tear down the initial-state couplings.
                 Array.ForEach(initialStateCouplings, coupling => couplingService.RemoveCoupling(coupling));

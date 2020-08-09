@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using ConcurrentCollections;
 using KCSim.Physics;
 using KCSim.Physics.Couplings;
 
@@ -10,26 +12,26 @@ namespace KCSim
 {
     public class PartsGraph : IPartsGraph
     {
-        private readonly Dictionary<Torqueable, ISet<Coupling>> graph;
-        private readonly ISet<Coupling> registeredCouplings;
+        private readonly ConcurrentDictionary<Torqueable, ConcurrentHashSet<Coupling>> graph;
+        private readonly ConcurrentHashSet<Coupling> registeredCouplings;
 
         public PartsGraph()
         {
-            graph = new Dictionary<Torqueable, ISet<Coupling>>();
-            registeredCouplings = new HashSet<Coupling>();
+            graph = new ConcurrentDictionary<Torqueable, ConcurrentHashSet<Coupling>>();
+            registeredCouplings = new ConcurrentHashSet<Coupling>();
         }
 
         public void AddVerticesAndEdge(Coupling coupling)
         {
             if (!graph.ContainsKey(coupling.Input))
             {
-                graph[coupling.Input] = new HashSet<Coupling>();
+                graph.TryAdd(coupling.Input, new ConcurrentHashSet<Coupling>());
             }
             graph[coupling.Input].Add(coupling);
 
             if (!graph.ContainsKey(coupling.Output))
             {
-                graph[coupling.Output] = new HashSet<Coupling>();
+                graph.TryAdd(coupling.Output, new ConcurrentHashSet<Coupling>());
             }
             graph[coupling.Output].Add(coupling);
 
@@ -38,14 +40,24 @@ namespace KCSim
 
         public void RemoveEdge(Coupling coupling)
         {
-            graph[coupling.Input].Remove(coupling);
-            graph[coupling.Output].Remove(coupling);
-            registeredCouplings.Remove(coupling);
+            if (graph.ContainsKey(coupling.Input))
+            {
+                graph[coupling.Input].TryRemove(coupling);
+            }
+            if (graph.ContainsKey(coupling.Output))
+            {
+                graph[coupling.Output].TryRemove(coupling);
+            }
+            registeredCouplings.TryRemove(coupling);
         }
 
         public ISet<Coupling> GetCouplings(Torqueable node)
         {
-            ISet<Coupling> couplings = graph.GetValueOrDefault(node, ImmutableHashSet<Coupling>.Empty);
+            ConcurrentHashSet<Coupling> couplings;
+            if (!graph.TryGetValue(node, out couplings))
+            {
+                couplings = new ConcurrentHashSet<Coupling>();
+            }
             return new HashSet<Coupling>(couplings);
         }
 

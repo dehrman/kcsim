@@ -6,19 +6,20 @@ using KCSim.Physics;
 using KCSim.Physics.Couplings;
 using static KCSim.Physics.Torqueable;
 using static KCSim.ICouplingMonitor;
+using System.Collections.Concurrent;
 
 namespace KCSim
 {
     public class CouplingMonitor : ICouplingMonitor
     {
         private readonly IDictionary<Coupling, ISet<OnCouplingRemovedDelegate>> onCouplingRemovedDelegates
-            = new Dictionary<Coupling, ISet<OnCouplingRemovedDelegate>>();
+            = new ConcurrentDictionary<Coupling, ISet<OnCouplingRemovedDelegate>>();
 
         private readonly IDictionary<Torqueable, ISet<OnCoupledToInputDelegate>> onCoupledToInputDelegates
-            = new Dictionary<Torqueable, ISet<OnCoupledToInputDelegate>>();
+            = new ConcurrentDictionary<Torqueable, ISet<OnCoupledToInputDelegate>>();
 
         private readonly IDictionary<Torqueable, OnForceChangeDelegate> torqueablesBeingMonitoredForForceChanges
-            = new Dictionary<Torqueable, OnForceChangeDelegate>();
+            = new ConcurrentDictionary<Torqueable, OnForceChangeDelegate>();
 
         private readonly IPartsGraph partsGraph;
         private readonly ForceEvaluator forceEvaluator;
@@ -132,12 +133,12 @@ namespace KCSim
 
         private void RemoveAnyForceMonitoring(Coupling coupling)
         {
-            if (!torqueablesBeingMonitoredForForceChanges.ContainsKey(coupling.Input))
+            if (torqueablesBeingMonitoredForForceChanges.ContainsKey(coupling.Input))
             {
                 coupling.Input.OnForceChange -= torqueablesBeingMonitoredForForceChanges[coupling.Input];
                 torqueablesBeingMonitoredForForceChanges.Remove(coupling.Input);
             }
-            if (!torqueablesBeingMonitoredForForceChanges.ContainsKey(coupling.Output))
+            if (torqueablesBeingMonitoredForForceChanges.ContainsKey(coupling.Output))
             {
                 coupling.Output.OnForceChange -= torqueablesBeingMonitoredForForceChanges[coupling.Output];
                 torqueablesBeingMonitoredForForceChanges.Remove(coupling.Output);

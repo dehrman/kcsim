@@ -10,22 +10,27 @@ namespace KCSim.Parts.State
 {
     public class RingOscillator : IOscillator
     {
-        public readonly Axle Power = new Axle("ring oscillator power");
-        public readonly Axle Q = new Axle("ring oscillator Q");
+        // Higher values for this constant lead to a slower clock rate.
+        private static readonly int NumGates = 10;
 
+        private readonly Axle Power = new Axle("ring oscillator power");
+        private readonly Axle Q = new Axle("ring oscillator Q");
+
+        private readonly ICouplingService couplingService;
         private readonly ISet<OnQChangedDelegate> onQChangedDelegateSet = new HashSet<OnQChangedDelegate>();
 
         public RingOscillator(
             ICouplingService couplingService,
-            IGateFactory gateFactory,
-            int numGates)
+            IGateFactory gateFactory)
         {
-            Contract.Requires(numGates > 0, "A ring oscillator requires at least one gate.");
+            Contract.Requires(NumGates > 0, "A ring oscillator requires at least one gate.");
+
+            this.couplingService = couplingService;
 
             // Create the gates.
-            var buffers = Enumerable.Range(0, numGates)
+            var buffers = Enumerable.Range(0, NumGates)
                 .Select(x => gateFactory.CreateNewBuffer()).ToArray();
-            var notGates = Enumerable.Range(0, numGates)
+            var notGates = Enumerable.Range(0, NumGates)
                 .Select(x => gateFactory.CreateNewNotGate()).ToArray();
 
             // Connect the first gate to the output.
@@ -35,7 +40,7 @@ namespace KCSim.Parts.State
             couplingService.CreateNewLockedCoupling(buffers[0].Output, notGates[0].Input);
             
             // Connect the gates to each other.
-            for (int i = 1; i < numGates; i++)
+            for (int i = 1; i < NumGates; i++)
             {
                 couplingService.CreateNewLockedCoupling(notGates[i - 1].Output, buffers[i].Input);
                 couplingService.CreateNewLockedCoupling(buffers[i].Output, notGates[i].Input);
@@ -59,6 +64,16 @@ namespace KCSim.Parts.State
         public ISet<OnQChangedDelegate> GetOnQChangedDelegateSet()
         {
             return onQChangedDelegateSet;
+        }
+
+        public void CouplePowerInput(Torqueable powerInput)
+        {
+            couplingService.CreateNewLockedCoupling(powerInput, Power);
+        }
+
+        public Axle GetOutput()
+        {
+            return Q;
         }
 
         private class QListener : Axle

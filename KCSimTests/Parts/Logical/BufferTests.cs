@@ -6,12 +6,8 @@ using Xunit;
 
 namespace KCSimTests.Parts.Logical
 {
-    public class BufferTests
+    public class BufferTests : BaseGateTest
     {
-        private readonly TestUtil testUtil = new TestUtil();
-        private readonly ForceEvaluator forceEvaluator;
-        private readonly ICouplingService couplingService;
-
         private readonly ExternalSwitch inputSwitch = new ExternalSwitch();
         private readonly ExternalSwitch motor = new ExternalSwitch();
 
@@ -19,10 +15,6 @@ namespace KCSimTests.Parts.Logical
 
         public BufferTests()
         {
-            forceEvaluator = testUtil.GetSingletonForceEvaluator();
-            couplingService = testUtil.GetSingletonCouplingService();
-
-            IGateFactory gateFactory = testUtil.GetGateFactory();
             buffer = gateFactory.CreateNewBuffer();
 
             couplingService.CreateNewLockedCoupling(inputSwitch, buffer.Input);
@@ -35,10 +27,10 @@ namespace KCSimTests.Parts.Logical
         [InlineData(2, 1, 1)]
         public void TestThat_OutputPowerIsAtPowerLevelRatherThanInputLevel(int input, int power, int expectedOutput)
         {
-            inputSwitch.Force = new Force(input);
-            motor.Force = new Force(power);
-            forceEvaluator.EvaluateForces();
-            Assert.Equal(new Force(expectedOutput), buffer.Output.GetNetForce());
+            inputSwitch.Force = new Force(input * 1000);
+            motor.Force = new Force(power * 1000);
+            EvaluateForcesWithDelay();
+            TestUtil.AssertDirectionsEqual(new Force(expectedOutput), buffer.Output.GetNetForce());
         }
 
         [Theory]
@@ -50,10 +42,10 @@ namespace KCSimTests.Parts.Logical
         [InlineData(1, -1)]
         public void TestThat_NonPositivePowerYieldsHighImpedanceOutput(int input, int power)
         {
-            inputSwitch.Force = new Force(input);
-            motor.Force = new Force(power);
-            forceEvaluator.EvaluateForces();
-            Assert.Equal(Force.ZeroForce, buffer.Output.GetNetForce());
+            inputSwitch.Force = new Force(input * 1000);
+            motor.Force = new Force(power * 1000);
+            EvaluateForcesWithDelay();
+            TestUtil.AssertDirectionsEqual(Force.ZeroForce, buffer.Output.GetNetForce());
         }
     }
 }

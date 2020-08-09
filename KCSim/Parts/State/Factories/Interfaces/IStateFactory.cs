@@ -10,5 +10,7 @@ namespace KCSim.Parts.State
         SRLatch CreateNewSRLatch(string name = "SR latch");
 
         GatedDLatch CreateNewGatedDLatch(string name = "gated D latch");
+
+        DFlipFlop CreateNewDFlipFlop(string name = "D flip-flop");
     }
 }
